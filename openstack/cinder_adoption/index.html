@@ -1564,7 +1564,7 @@ changes and deploy the Cinder services.</p>
 <div class="highlight"><pre><span></span><code>oc<span class="w"> </span>patch<span class="w"> </span>openstackcontrolplane<span class="w"> </span>openstack<span class="w"> </span>--type<span class="o">=</span>merge<span class="w"> </span>--patch-file<span class="o">=</span>cinder.patch
 <span class="w"> </span><span class="sb">```</span>
 
-For<span class="w"> </span>example,<span class="w"> </span><span class="k">for</span><span class="w"> </span>example<span class="w"> </span><span class="k">for</span><span class="w"> </span>the<span class="w"> </span>RBD<span class="w"> </span>deployment<span class="w"> </span>from<span class="w"> </span>the<span class="w"> </span>Development<span class="w"> </span>Guide<span class="w"> </span>the
+For<span class="w"> </span>example,<span class="w"> </span><span class="k">for</span><span class="w"> </span>the<span class="w"> </span>RBD<span class="w"> </span>deployment<span class="w"> </span>from<span class="w"> </span>the<span class="w"> </span>Development<span class="w"> </span>Guide<span class="w"> </span>the
 <span class="sb">`</span>cinder.patch<span class="sb">`</span><span class="w"> </span>would<span class="w"> </span>look<span class="w"> </span>like<span class="w"> </span>this:
 
 <span class="sb">```</span>yaml
@@ -1653,6 +1653,15 @@ oc<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-i
 we have taken the opportunity to change its configuration to support
 Active-Active, even though we are not doing so right now because we have 1
 replica.</p>
+<p>Now that we have the Cinder services running we know that the DB schema
+migration has been completed and we can proceed to apply the DB data migrations.
+While it is not necessary to run these data migrations at this precise moment,
+because we can just run them right before the next upgrade, we consider that for
+adoption it's best to run them now to make sure there are no issues before
+running production workloads on the deployment.</p>
+<p>The command to run the DB data migrations is:</p>
+<div class="highlight"><pre><span></span><code>oc<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>cinder-scheduler-0<span class="w"> </span>--<span class="w"> </span>cinder-manage<span class="w"> </span>db<span class="w"> </span>online_data_migrations
+</code></pre></div>
 <h2 id="post-checks">Post-checks<a class="headerlink" href="#post-checks" title="Permanent link">#</a></h2>
 <p>Before we can run any checks we need to set the right cloud configuration for
 the <code>openstack</code> command to be able to connect to our OpenShift control plane.</p>
@@ -1704,7 +1713,7 @@ the old volume because nova and cinder are still not connected.</p>
   <small>
     
       Last update:
-      2023-07-26
+      2023-07-28
     
   </small>
 </div>
