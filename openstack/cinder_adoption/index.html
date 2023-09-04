@@ -1744,13 +1744,12 @@ changes and deploy the Cinder services.</p>
 <span class="w">      </span><span class="nt">databaseInstance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openstack</span>
 <span class="w">      </span><span class="nt">secret</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">osp-secret</span>
 <span class="w">      </span><span class="nt">cinderAPI</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 <span class="w">        </span><span class="nt">externalEndpoints</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">internal</span>
 <span class="w">          </span><span class="nt">ipAddressPool</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">internalapi</span>
 <span class="w">          </span><span class="nt">loadBalancerIPs</span><span class="p">:</span>
 <span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">172.17.0.80</span>
-<span class="w">      </span><span class="nt">cinderAPI</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 <span class="w">        </span><span class="nt">customServiceConfig</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
 <span class="w">          </span><span class="no">[DEFAULT]</span>
 <span class="w">          </span><span class="no">default_volume_type=tripleo</span>
@@ -1865,7 +1864,7 @@ the old volume because nova and cinder are still not connected.</p>
   <small>
     
       Last update:
-      2023-08-30
+      2023-09-04
     
   </small>
 </div>
