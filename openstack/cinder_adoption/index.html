@@ -1717,73 +1717,70 @@ changes and deploy the Cinder services.</p>
 <p>Our recommendation is to write the patch manifest into a file, for example
 <code>cinder.patch</code> and then apply it with something like:</p>
 <div class="highlight"><pre><span></span><code>oc<span class="w"> </span>patch<span class="w"> </span>openstackcontrolplane<span class="w"> </span>openstack<span class="w"> </span>--type<span class="o">=</span>merge<span class="w"> </span>--patch-file<span class="o">=</span>cinder.patch
-<span class="w"> </span><span class="sb">```</span>
-
-For<span class="w"> </span>example,<span class="w"> </span><span class="k">for</span><span class="w"> </span>the<span class="w"> </span>RBD<span class="w"> </span>deployment<span class="w"> </span>from<span class="w"> </span>the<span class="w"> </span>Development<span class="w"> </span>Guide<span class="w"> </span>the
-<span class="sb">`</span>cinder.patch<span class="sb">`</span><span class="w"> </span>would<span class="w"> </span>look<span class="w"> </span>like<span class="w"> </span>this:
-
-<span class="sb">```</span>yaml
-spec:
-<span class="w">  </span>extraMounts:
-<span class="w">  </span>-<span class="w"> </span>extraVol:
-<span class="w">    </span>-<span class="w"> </span>extraVolType:<span class="w"> </span>Ceph
-<span class="w">      </span>mounts:
-<span class="w">      </span>-<span class="w"> </span>mountPath:<span class="w"> </span>/etc/ceph
-<span class="w">        </span>name:<span class="w"> </span>ceph
-<span class="w">        </span>readOnly:<span class="w"> </span><span class="nb">true</span>
-<span class="w">      </span>propagation:
-<span class="w">      </span>-<span class="w"> </span>CinderVolume
-<span class="w">      </span>-<span class="w"> </span>CinderBackup
-<span class="w">      </span>-<span class="w"> </span>Glance
-<span class="w">      </span>volumes:
-<span class="w">      </span>-<span class="w"> </span>name:<span class="w"> </span>ceph
-<span class="w">        </span>projected:
-<span class="w">          </span>sources:
-<span class="w">          </span>-<span class="w"> </span>secret:
-<span class="w">              </span>name:<span class="w"> </span>ceph-conf-files
-<span class="w">  </span>cinder:
-<span class="w">    </span>enabled:<span class="w"> </span><span class="nb">true</span>
-<span class="w">    </span>template:
-<span class="w">      </span>databaseInstance:<span class="w"> </span>openstack
-<span class="w">      </span>secret:<span class="w"> </span>osp-secret
-<span class="w">      </span>cinderAPI:
-<span class="w">        </span>externalEndpoints:
-<span class="w">        </span>-<span class="w"> </span>endpoint:<span class="w"> </span>internal
-<span class="w">          </span>ipAddressPool:<span class="w"> </span>internalapi
-<span class="w">          </span>loadBalancerIPs:
-<span class="w">          </span>-<span class="w"> </span><span class="m">172</span>.17.0.80
-<span class="w">      </span>cinderAPI:
-<span class="w">        </span>replicas:<span class="w"> </span><span class="m">1</span>
-<span class="w">        </span>customServiceConfig:<span class="w"> </span><span class="p">|</span>
-<span class="w">          </span><span class="o">[</span>DEFAULT<span class="o">]</span>
-<span class="w">          </span><span class="nv">default_volume_type</span><span class="o">=</span>tripleo
-<span class="w">      </span>cinderScheduler:
-<span class="w">        </span>replicas:<span class="w"> </span><span class="m">1</span>
-<span class="w">      </span>cinderBackup:
-<span class="w">        </span>networkAttachments:
-<span class="w">        </span>-<span class="w"> </span>storage
-<span class="w">        </span>replicas:<span class="w"> </span><span class="m">1</span>
-<span class="w">        </span>customServiceConfig:<span class="w"> </span><span class="p">|</span>
-<span class="w">          </span><span class="o">[</span>DEFAULT<span class="o">]</span>
-<span class="w">          </span><span class="nv">backup_driver</span><span class="o">=</span>cinder.backup.drivers.ceph.CephBackupDriver
-<span class="w">          </span><span class="nv">backup_ceph_conf</span><span class="o">=</span>/etc/ceph/ceph.conf
-<span class="w">          </span><span class="nv">backup_ceph_user</span><span class="o">=</span>openstack
-<span class="w">          </span><span class="nv">backup_ceph_pool</span><span class="o">=</span>backups
-<span class="w">      </span>cinderVolumes:
-<span class="w">        </span>ceph:
-<span class="w">          </span>networkAttachments:
-<span class="w">          </span>-<span class="w"> </span>storage
-<span class="w">          </span>replicas:<span class="w"> </span><span class="m">1</span>
-<span class="w">          </span>customServiceConfig:<span class="w"> </span><span class="p">|</span>
-<span class="w">            </span><span class="o">[</span>tripleo_ceph<span class="o">]</span>
-<span class="w">            </span><span class="nv">backend_host</span><span class="o">=</span>hostgroup
-<span class="w">            </span><span class="nv">volume_backend_name</span><span class="o">=</span>tripleo_ceph
-<span class="w">            </span><span class="nv">volume_driver</span><span class="o">=</span>cinder.volume.drivers.rbd.RBDDriver
-<span class="w">            </span><span class="nv">rbd_ceph_conf</span><span class="o">=</span>/etc/ceph/ceph.conf
-<span class="w">            </span><span class="nv">rbd_user</span><span class="o">=</span>openstack
-<span class="w">            </span><span class="nv">rbd_pool</span><span class="o">=</span>volumes
-<span class="w">            </span><span class="nv">rbd_flatten_volume_from_snapshot</span><span class="o">=</span>False
-<span class="w">            </span><span class="nv">report_discard_supported</span><span class="o">=</span>True
+</code></pre></div>
+<p>For example, for the RBD deployment from the Development Guide the
+<code>cinder.patch</code> would look like this:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">extraMounts</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">extraVol</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">extraVolType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ceph</span>
+<span class="w">      </span><span class="nt">mounts</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/etc/ceph</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ceph</span>
+<span class="w">        </span><span class="nt">readOnly</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">      </span><span class="nt">propagation</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CinderVolume</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CinderBackup</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Glance</span>
+<span class="w">      </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ceph</span>
+<span class="w">        </span><span class="nt">projected</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">sources</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">secret</span><span class="p">:</span>
+<span class="w">              </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ceph-conf-files</span>
+<span class="w">  </span><span class="nt">cinder</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">template</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">databaseInstance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openstack</span>
+<span class="w">      </span><span class="nt">secret</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">osp-secret</span>
+<span class="w">      </span><span class="nt">cinderAPI</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">externalEndpoints</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">internal</span>
+<span class="w">          </span><span class="nt">ipAddressPool</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">internalapi</span>
+<span class="w">          </span><span class="nt">loadBalancerIPs</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">172.17.0.80</span>
+<span class="w">      </span><span class="nt">cinderAPI</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">        </span><span class="nt">customServiceConfig</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">          </span><span class="no">[DEFAULT]</span>
+<span class="w">          </span><span class="no">default_volume_type=tripleo</span>
+<span class="w">      </span><span class="nt">cinderScheduler</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">      </span><span class="nt">cinderBackup</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">networkAttachments</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">storage</span>
+<span class="w">        </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">        </span><span class="nt">customServiceConfig</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">          </span><span class="no">[DEFAULT]</span>
+<span class="w">          </span><span class="no">backup_driver=cinder.backup.drivers.ceph.CephBackupDriver</span>
+<span class="w">          </span><span class="no">backup_ceph_conf=/etc/ceph/ceph.conf</span>
+<span class="w">          </span><span class="no">backup_ceph_user=openstack</span>
+<span class="w">          </span><span class="no">backup_ceph_pool=backups</span>
+<span class="w">      </span><span class="nt">cinderVolumes</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">ceph</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">networkAttachments</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">storage</span>
+<span class="w">          </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">          </span><span class="nt">customServiceConfig</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">            </span><span class="no">[tripleo_ceph]</span>
+<span class="w">            </span><span class="no">backend_host=hostgroup</span>
+<span class="w">            </span><span class="no">volume_backend_name=tripleo_ceph</span>
+<span class="w">            </span><span class="no">volume_driver=cinder.volume.drivers.rbd.RBDDriver</span>
+<span class="w">            </span><span class="no">rbd_ceph_conf=/etc/ceph/ceph.conf</span>
+<span class="w">            </span><span class="no">rbd_user=openstack</span>
+<span class="w">            </span><span class="no">rbd_pool=volumes</span>
+<span class="w">            </span><span class="no">rbd_flatten_volume_from_snapshot=False</span>
+<span class="w">            </span><span class="no">report_discard_supported=True</span>
 </code></pre></div>
 <p>Once the services have been deployed we'll need to clean up the old scheduler
 and backup services which will appear as being down while we have others that
@@ -1868,7 +1865,7 @@ the old volume because nova and cinder are still not connected.</p>
   <small>
     
       Last update:
-      2023-07-28
+      2023-08-30
     
   </small>
 </div>
