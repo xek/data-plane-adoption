@@ -22,7 +22,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.2, mkdocs-material-9.2.7">
+      <meta name="generator" content="mkdocs-1.5.2, mkdocs-material-9.2.8">
     
     
       
@@ -803,6 +803,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#reset-the-environment-to-pre-adoption-state" class="md-nav__link">
+    Reset the environment to pre-adoption state
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#experimenting-with-an-additional-compute-node" class="md-nav__link">
     Experimenting with an additional compute node
   </a>
@@ -961,6 +968,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#reset-the-environment-to-pre-adoption-state" class="md-nav__link">
+    Reset the environment to pre-adoption state
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#experimenting-with-an-additional-compute-node" class="md-nav__link">
     Experimenting with an additional compute node
   </a>
@@ -1103,7 +1117,9 @@ make standalone_revert
 </code></pre></div>
 <p>Similar snapshot could be done for the CRC virtual machine, but the
 developer environment reset on CRC side can be done sufficiently via
-the install_yamls <code>*_cleanup</code> targets.</p>
+the install_yamls <code>*_cleanup</code> targets. This is further detailed in 
+the section: 
+<a href="https://openstack-k8s-operators.github.io/data-plane-adoption/contributing/development_environment/#reset-the-environment-to-pre-adoption-state">Reset the environment to pre-adoption state</a></p>
 <h3 id="create-a-workload-to-adopt">Create a workload to adopt<a class="headerlink" href="#create-a-workload-to-adopt" title="Permanent link">#</a></h3>
 <p>For this example we'll upload a Glance image and confirm it's using
 the Ceph cluster. Later you can adopt the Glance image in the NG
@@ -1138,8 +1154,21 @@ documentation</a>
 and perform adoption manually, or run the <a href="https://openstack-k8s-operators.github.io/data-plane-adoption/contributing/tests/">test
 suite</a>
 against your environment.</p>
-<hr />
-<hr />
+<h2 id="reset-the-environment-to-pre-adoption-state">Reset the environment to pre-adoption state<a class="headerlink" href="#reset-the-environment-to-pre-adoption-state" title="Permanent link">#</a></h2>
+<p>The development environment must be rolled back in case we want to execute another Adoption run. </p>
+<p>Delete the data-plane and control-plane resources from the CRC vm
+<div class="highlight"><pre><span></span><code>oc delete osdp openstack
+oc delete oscp openstack
+</code></pre></div></p>
+<p>Revert the standalone vm to the snapshotted state</p>
+<p><div class="highlight"><pre><span></span><code>cd install_yamls/devsetup
+make standalone_revert
+</code></pre></div>
+Clean up and initialize the storage PVs in CRC vm 
+<div class="highlight"><pre><span></span><code>cd ..
+make crc_storage_cleanup
+make crc_storage
+</code></pre></div></p>
 <h2 id="experimenting-with-an-additional-compute-node">Experimenting with an additional compute node<a class="headerlink" href="#experimenting-with-an-additional-compute-node" title="Permanent link">#</a></h2>
 <p>The following is not on the critical path of preparing the development
 environment for Adoption, but it shows how to make the environment
@@ -1281,7 +1310,7 @@ The same pattern can be applied to other services.</p>
   <small>
     
       Last update:
-      2023-07-04
+      2023-08-31
     
   </small>
 </div>
