@@ -994,6 +994,12 @@ done
 EOF
 </code></pre></div>
 <ul>
+<li>Before restoring the databases from .sql files, we need to ensure that the neutron
+database name is "neutron" and not "ovs_neutron" by running the command:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>sed -i &#39;/^CREATE DATABASE/s/ovs_neutron/neutron/g;/^USE/s/ovs_neutron/neutron/g&#39; ovs_neutron.sql
+</code></pre></div>
+<ul>
 <li>Restore the databases from .sql files into the podified MariaDB:</li>
 </ul>
 <div class="highlight"><pre><span></span><code>for dbname in cinder glance keystone nova_api nova_cell0 nova ovs_neutron placement; do
@@ -1015,7 +1021,7 @@ done
   <small>
     
       Last update:
-      2023-06-28
+      2023-08-25
     
   </small>
 </div>
