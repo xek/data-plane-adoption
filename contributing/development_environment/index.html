@@ -1052,20 +1052,6 @@ Wallaby OpenStack in Standalone configuration.</p>
 <div class="highlight"><pre><span></span><code>cd install_yamls/devsetup
 make download_tools
 </code></pre></div>
-<p>If you want a less intrusive alternative (Go from RPM rather than
-upstream etc.) that allows for basic testing, make sure to at least do
-the following:</p>
-<div class="highlight"><pre><span></span><code>sudo dnf -y install \
-    git \
-    golang \
-    guestfs-tools \
-    dbus-x11 \
-    libvirt \
-    make
-
-go env -w GOPROXY=&quot;https://proxy.golang.org,direct&quot;
-GO111MODULE=on go install sigs.k8s.io/kustomize/kustomize/v5@latest
-</code></pre></div>
 <h2 id="deployment-of-crc-with-network-isolation">Deployment of CRC with network isolation<a class="headerlink" href="#deployment-of-crc-with-network-isolation" title="Permanent link">#</a></h2>
 <p><div class="highlight"><pre><span></span><code>cd install_yamls/devsetup
 PULL_SECRET=$HOME/pull-secret.txt CPUS=12 MEMORY=40000 DISK=100 make crc
@@ -1310,7 +1296,7 @@ The same pattern can be applied to other services.</p>
   <small>
     
       Last update:
-      2023-08-31
+      2023-09-05
     
   </small>
 </div>
