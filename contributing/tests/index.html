@@ -779,6 +779,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#running-tests-on-systems-where-binsh-is-not-binbash" class="md-nav__link">
+    Running tests on systems where /bin/sh is not /bin/bash
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -835,6 +842,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#running-tests-on-systems-where-binsh-is-not-binbash" class="md-nav__link">
+    Running tests on systems where /bin/sh is not /bin/bash
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -883,13 +897,27 @@ samples are provided. To run the tests, follow this procedure:</p>
 <p>Run <code>make test-minimal</code>.</p>
 </li>
 </ul>
+<h2 id="running-tests-on-systems-where-binsh-is-not-binbash">Running tests on systems where /bin/sh is not /bin/bash<a class="headerlink" href="#running-tests-on-systems-where-binsh-is-not-binbash" title="Permanent link">#</a></h2>
+<p>ansible.builtin.command and ansible.builtin.shell use /bin/sh by default.
+for portability reason when using either command or shell modules you should
+not assume /bin/sh is bash and assume it is simply a posix compliant shell</p>
+<p>In this repo that requirement is relax for the ansible.builtin.shell
+module as we configure module_defaults</p>
+<div class="highlight"><pre><span></span><code>  module_defaults:
+    ansible.builtin.shell:
+      executable: /bin/bash
+</code></pre></div>
+<p>module_defaults are configure per playbook play so if you are adding a new
+play or playbook you will need to copy this to ensure compatibility</p>
+<p>note the command module always uses /bin/sh so we should avoid bash specific
+syntax when using command or just use the shell module instead.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      2023-02-23
+      2023-09-05
     
   </small>
 </div>
