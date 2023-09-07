@@ -12,13 +12,13 @@
         <meta name="author" content="OpenStack Team">
       
       
-        <link rel="canonical" href="https://openstack-k8s-operators.github.io/data-plane-adoption/openstack/placement_adoption/">
+        <link rel="canonical" href="https://openstack-k8s-operators.github.io/data-plane-adoption/openstack/horizon_adoption/">
       
       
-        <link rel="prev" href="../glance_adoption/">
+        <link rel="prev" href="../cinder_adoption/">
       
       
-        <link rel="next" href="../cinder_adoption/">
+        <link rel="next" href="../edpm_adoption/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
@@ -26,7 +26,7 @@
     
     
       
-        <title>Placement adoption - OpenStack Data Plane Adoption</title>
+        <title>Horizon adoption - OpenStack Data Plane Adoption</title>
       
     
     
@@ -81,7 +81,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#placement-adoption" class="md-skip">
+        <a href="#horizon-adoption" class="md-skip">
           Skip to content
         </a>
       
@@ -120,7 +120,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Placement adoption
+              Horizon adoption
             
           </span>
         </div>
@@ -478,6 +478,46 @@
                 
   
   
+  
+    <li class="md-nav__item">
+      <a href="../placement_adoption/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Placement adoption
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cinder_adoption/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Cinder adoption
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -493,7 +533,7 @@
           
   
   <span class="md-ellipsis">
-    Placement adoption
+    Horizon adoption
   </span>
   
 
@@ -504,7 +544,7 @@
         
   
   <span class="md-ellipsis">
-    Placement adoption
+    Horizon adoption
   </span>
   
 
@@ -540,8 +580,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#procedure-placement-adoption" class="md-nav__link">
-    Procedure - Placement adoption
+  <a href="#procedure-horizon-adoption" class="md-nav__link">
+    Procedure - Horizon adoption
   </a>
   
 </li>
@@ -557,46 +597,6 @@
   
 </nav>
       
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../cinder_adoption/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Cinder adoption
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../horizon_adoption/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Horizon adoption
-  </span>
-  
-
-      </a>
     </li>
   
 
@@ -872,8 +872,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#procedure-placement-adoption" class="md-nav__link">
-    Procedure - Placement adoption
+  <a href="#procedure-horizon-adoption" class="md-nav__link">
+    Procedure - Horizon adoption
   </a>
   
 </li>
@@ -903,48 +903,38 @@
   
 
 
-<h1 id="placement-adoption">Placement adoption<a class="headerlink" href="#placement-adoption" title="Permanent link">#</a></h1>
+<h1 id="horizon-adoption">Horizon adoption<a class="headerlink" href="#horizon-adoption" title="Permanent link">#</a></h1>
 <h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h2>
 <ul>
-<li>Previous Adoption steps completed. Notably, the service databases
-  must already be imported into the podified MariaDB.</li>
+<li>Previous Adoption steps completed. Notably, Memcached and 
+  keystone should be already adopted.</li>
 </ul>
 <h2 id="variables">Variables<a class="headerlink" href="#variables" title="Permanent link">#</a></h2>
 <p>(There are no shell variables necessary currently.)</p>
-<h2 id="procedure-placement-adoption">Procedure - Placement adoption<a class="headerlink" href="#procedure-placement-adoption" title="Permanent link">#</a></h2>
+<h2 id="procedure-horizon-adoption">Procedure - Horizon adoption<a class="headerlink" href="#procedure-horizon-adoption" title="Permanent link">#</a></h2>
 <ul>
-<li>Patch OpenStackControlPlane to deploy Placement:</li>
+<li>Patch OpenStackControlPlane to deploy Horizon:</li>
 </ul>
 <div class="highlight"><pre><span></span><code>oc patch openstackcontrolplane openstack --type=merge --patch &#39;
 spec:
-  placement:
+  horizon:
     enabled: true
     template:
-      databaseInstance: openstack
+      memcachedInstance: memcached
       secret: osp-secret
-      externalEndpoints:
-      - endpoint: internal
-        ipAddressPool: internalapi
-        loadBalancerIPs:
-        - 172.17.0.80
 &#39;
 </code></pre></div>
 <h2 id="post-checks">Post-checks<a class="headerlink" href="#post-checks" title="Permanent link">#</a></h2>
 <ul>
-<li>See that Placement endpoints are defined and pointing to the
-  podified FQDNs and that Placement API responds.</li>
+<li>See that Horizon instance is successfully deployed and ready</li>
 </ul>
-<div class="highlight"><pre><span></span><code>alias openstack=&quot;oc exec -t openstackclient -- openstack&quot;
-
-openstack endpoint list | grep placement
-
-
-# Without OpenStack CLI placement plugin installed:
-PLACEMENT_PUBLIC_URL=$(openstack endpoint list -c &#39;Service Name&#39; -c &#39;Service Type&#39; -c URL | grep placement | grep public | awk &#39;{ print $6; }&#39;)
-curl &quot;$PLACEMENT_PUBLIC_URL&quot;
-
-# With OpenStack CLI placement plugin installed:
-openstack resource class list
+<div class="highlight"><pre><span></span><code>oc get horizon
+</code></pre></div>
+<ul>
+<li>Check that dashboard is reachable and returns status code <code>200</code></li>
+</ul>
+<div class="highlight"><pre><span></span><code>PUBLIC_URL=$(oc get horizon horizon -o jsonpath=&#39;{.status.endpoint}&#39;)
+curl --silent --output /dev/stderr --head --write-out &quot;%{http_code}&quot; &quot;$PUBLIC_URL/dashboard/auth/login/?next=/dashboard/&quot; | grep 200
 </code></pre></div>
 
   <hr>
@@ -952,7 +942,7 @@ openstack resource class list
   <small>
     
       Last update:
-      2023-07-14
+      2023-09-07
     
   </small>
 </div>
