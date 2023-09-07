@@ -40,9 +40,6 @@ spec:
         networkAttachments:
         - storage
         replicas: 0
-      cinderVolumes:
-        networkAttachments:
-        - storage
 """
 
 EXTRAMOUNTS_CEPH = """
@@ -340,9 +337,10 @@ class CinderTransformer(object):
         if any('RBDDriver' == self.get_driver(b) for b in self.backends):
             LOG.warning('Deployment uses Ceph, so make sure the Ceph '
                         'credentials and configuration are present in '
-                        'OpenShift as a asecret and then use the extra '
+                        'OpenShift as a secret and then use the extra '
                         'volumes to make them available in all the services '
-                        'that would need them.\n')
+                        'that would need them. A reference is included in '
+                        'the .path file\n')
 
         if not self.do_only_backends:
             username = self.username
@@ -391,7 +389,7 @@ class CinderTransformer(object):
     def get_driver(self, input):
         if isinstance(input, str):
             input = self.get(input)
-        driver = input.get('volume_driver', 'lvm.LVMVolumeDriver')
+        driver = input.get('volume_driver', ['lvm.LVMVolumeDriver'])
         class_name = driver[-1].rsplit('.')[-1]
         return class_name
 
@@ -481,7 +479,7 @@ class CinderTransformer(object):
         template = res['spec']['cinder']['template']
 
         if self.username:
-            template['serviceUser'] = self.username
+            template['serviceUser'] = self.username[0]
 
         self.svc_cfg(template, 'global_defaults')
         self.svc_cfg(template['cinderAPI'], 'api')
@@ -490,19 +488,22 @@ class CinderTransformer(object):
             self.svc_cfg(template['cinderBackup'], 'backup')
             template['cinderBackup']['replicas'] = 3
 
-        vols = template['cinderVolumes']
+        vols = template.setdefault('cinderVolumes', {})
         # TODO: Uncomment once cinder-operator supports config for all volumes
         # self.svc_cfg(vols, 'volume_global')
         volumes = self.processed_data['volumes']
 
-        if any('RBDDriver' == self.get_driver(v) for v in volumes.values()):
+        if any('RBDDriver' == self.get_driver(v[k])
+               for k, v in volumes.items()):
             res['spec'].update(yaml.load(EXTRAMOUNTS_CEPH,
                                          Loader=yaml.SafeLoader))
 
         for backend, config in volumes.items():
             # Names cannot use _ in the operator
             manifest_backend_name = backend.replace('_', '-')
-            backend_data = vols[manifest_backend_name] = {}
+            backend_data = vols[manifest_backend_name] = {
+                'networkAttachments': ['storage'],
+            }
 
             # TODO:Remove once cinder-operator supports config for all volumes
             config.update(self.processed_data['volume_global'])
