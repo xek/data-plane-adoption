@@ -951,6 +951,13 @@ spec:
     template:
       databaseInstance: openstack
       secret: osp-secret
+      externalEndpoints:
+      - endpoint: internal
+        ipAddressPool: internalapi
+        loadBalancerIPs:
+        - 172.17.0.80
+      networkAttachments:
+      - internalapi
 &#39;
 </code></pre></div>
 <h2 id="post-checks">Post-checks<a class="headerlink" href="#post-checks" title="Permanent link">#</a></h2>
@@ -980,7 +987,7 @@ openstack<span class="w"> </span>router<span class="w"> </span>create<span class
   <small>
     
       Last update:
-      2023-07-20
+      2023-09-06
     
   </small>
 </div>
