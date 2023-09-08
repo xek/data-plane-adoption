@@ -1123,8 +1123,8 @@ make standalone_revert
 </code></pre></div>
 <p>Similar snapshot could be done for the CRC virtual machine, but the
 developer environment reset on CRC side can be done sufficiently via
-the install_yamls <code>*_cleanup</code> targets. This is further detailed in 
-the section: 
+the install_yamls <code>*_cleanup</code> targets. This is further detailed in
+the section:
 <a href="https://openstack-k8s-operators.github.io/data-plane-adoption/contributing/development_environment/#reset-the-environment-to-pre-adoption-state">Reset the environment to pre-adoption state</a></p>
 <h3 id="create-a-workload-to-adopt">Create a workload to adopt<a class="headerlink" href="#create-a-workload-to-adopt" title="Permanent link">#</a></h3>
 <p>For this example we'll upload a Glance image and confirm it's using
@@ -1161,7 +1161,7 @@ and perform adoption manually, or run the <a href="https://openstack-k8s-operato
 suite</a>
 against your environment.</p>
 <h2 id="reset-the-environment-to-pre-adoption-state">Reset the environment to pre-adoption state<a class="headerlink" href="#reset-the-environment-to-pre-adoption-state" title="Permanent link">#</a></h2>
-<p>The development environment must be rolled back in case we want to execute another Adoption run. </p>
+<p>The development environment must be rolled back in case we want to execute another Adoption run.</p>
 <p>Delete the data-plane and control-plane resources from the CRC vm
 <div class="highlight"><pre><span></span><code>oc delete osdp openstack
 oc delete oscp openstack
@@ -1170,7 +1170,7 @@ oc delete oscp openstack
 <p><div class="highlight"><pre><span></span><code>cd install_yamls/devsetup
 make standalone_revert
 </code></pre></div>
-Clean up and initialize the storage PVs in CRC vm 
+Clean up and initialize the storage PVs in CRC vm
 <div class="highlight"><pre><span></span><code>cd ..
 make crc_storage_cleanup
 make crc_storage
@@ -1278,7 +1278,7 @@ that the <code>EDPM_COMPUTE_SUFFIX</code> is set to <code>1</code> or greater.
 Do not set <code>EDPM_COMPUTE_SUFFIX</code> to <code>0</code> or you could delete
 the Wallaby system created in the previous section.</p>
 <p>When deploying EDPM nodes add an <code>extraMounts</code> like the following in
-the <code>OpenStackDataPlane</code> CR <code>nodeTemplate</code> so that they will be
+the <code>OpenStackDataPlaneNodeSet</code> CR <code>nodeTemplate</code> so that they will be
 configured to use the same Ceph cluster.</p>
 <div class="highlight"><pre><span></span><code>    edpm-compute:
       nodeTemplate:
@@ -1316,7 +1316,7 @@ The same pattern can be applied to other services.</p>
   <small>
     
       Last update:
-      2023-09-05
+      2023-09-07
     
   </small>
 </div>
