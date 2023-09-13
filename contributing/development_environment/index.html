@@ -1127,19 +1127,8 @@ the install_yamls <code>*_cleanup</code> targets. This is further detailed in
 the section:
 <a href="https://openstack-k8s-operators.github.io/data-plane-adoption/contributing/development_environment/#reset-the-environment-to-pre-adoption-state">Reset the environment to pre-adoption state</a></p>
 <h3 id="create-a-workload-to-adopt">Create a workload to adopt<a class="headerlink" href="#create-a-workload-to-adopt" title="Permanent link">#</a></h3>
-<p>For this example we'll upload a Glance image and confirm it's using
-the Ceph cluster. Later you can adopt the Glance image in the NG
-deployment.</p>
-<p>Download a cirros image and convert it to raw format for Ceph.
-<div class="highlight"><pre><span></span><code>IMG=cirros-0.5.2-x86_64-disk.img
-URL=http://download.cirros-cloud.net/0.5.2/$IMG
-RAW=$(echo $IMG | sed s/img/raw/g)
-curl -L -# $URL &gt; $IMG
-qemu-img convert -f qcow2 -O raw $IMG $RAW
-</code></pre></div>
-Upload the image to Glance.
-<div class="highlight"><pre><span></span><code>export OS_CLOUD=standalone
-openstack image create cirros --disk-format=raw --container-format=bare &lt; $RAW
+<p><div class="highlight"><pre><span></span><code>export OS_CLOUD=standalone
+source ~/install_yamls/devsetup/scripts/edpm-deploy-instance.sh
 </code></pre></div>
 Confirm the image UUID can be seen in Ceph's images pool.
 <div class="highlight"><pre><span></span><code>sudo cephadm shell -- rbd -p images ls -l
@@ -1149,10 +1138,8 @@ Confirm the image UUID can be seen in Ceph's images pool.
 openstack volume backup create --name backup disk
 openstack volume snapshot create --volume disk snapshot
 </code></pre></div></p>
-<p>Boot a VM
-<div class="highlight"><pre><span></span><code>openstack flavor create tiny --id auto --ram 256 --disk 0 --vcpus 1
-openstack --os-compute-api-version 2.37 server create --flavor tiny --image cirros --nic none --wait vm
-openstack server add volume vm disk
+<p>Add volume to the test VM
+<div class="highlight"><pre><span></span><code>openstack server add volume test disk
 </code></pre></div></p>
 <h2 id="performing-the-data-plane-adoption">Performing the Data Plane Adoption<a class="headerlink" href="#performing-the-data-plane-adoption" title="Permanent link">#</a></h2>
 <p>The development environment is now set up, you can go to the <a href="https://openstack-k8s-operators.github.io/data-plane-adoption/">Adoption
@@ -1316,7 +1303,7 @@ The same pattern can be applied to other services.</p>
   <small>
     
       Last update:
-      2023-09-07
+      2023-09-11
     
   </small>
 </div>
