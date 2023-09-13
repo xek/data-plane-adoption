@@ -962,14 +962,21 @@ cluster.</p>
 <h2 id="variables">Variables<a class="headerlink" href="#variables" title="Permanent link">#</a></h2>
 <p>Define the shell variables used in the steps below. The values are
 just illustrative, use values that are correct for your environment:</p>
-<div class="highlight"><pre><span></span><code>PODIFIED_MARIADB_IP=$(oc get -o yaml pod mariadb-openstack | grep podIP: | awk &#39;{ print $2; }&#39;)
-MARIADB_IMAGE=quay.io/podified-antelope-centos9/openstack-mariadb:current-podified
+<div class="highlight"><pre><span></span><code>MARIADB_IMAGE=quay.io/podified-antelope-centos9/openstack-mariadb:current-podified
 
-SOURCE_DB_ROOT_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep &#39; MysqlRootPassword:&#39; | awk -F &#39;: &#39; &#39;{ print $2; }&#39;)
+PODIFIED_MARIADB_IP=$(oc get -o yaml pod mariadb-openstack | grep podIP: | awk &#39;{ print $2; }&#39;)
+PODIFIED_CELL1_MARIADB_IP=$(oc get -o yaml pod  mariadb-openstack-cell1  | grep podIP: | awk &#39;{ print $2; }&#39;)
 PODIFIED_DB_ROOT_PASSWORD=$(oc get -o json secret/osp-secret | jq -r .data.DbRootPassword | base64 -d)
 
 # Replace with your environment&#39;s MariaDB IP:
 SOURCE_MARIADB_IP=127.17.0.100
+SOURCE_DB_ROOT_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep &#39; MysqlRootPassword:&#39; | awk -F &#39;: &#39; &#39;{ print $2; }&#39;)
+
+# The CHARACTER_SET and collation should match the source DB
+# if the do not then it will break foreign key relationships
+# for any tables that are created in the future as part of db sync
+CHARACTER_SET=utf8
+COLLATION=utf8_general_ci
 </code></pre></div>
 <h2 id="pre-checks">Pre-checks<a class="headerlink" href="#pre-checks" title="Permanent link">#</a></h2>
 <ul>
@@ -985,10 +992,12 @@ SOURCE_MARIADB_IP=127.17.0.100
     mysqlcheck --all-databases -h $SOURCE_MARIADB_IP -u root &quot;-p$SOURCE_DB_ROOT_PASSWORD&quot; | grep -v OK
 </code></pre></div>
 <ul>
-<li>Test connection to podified DB (show databases):</li>
+<li>Test connection to podified DBs (show databases):</li>
 </ul>
 <div class="highlight"><pre><span></span><code>oc run mariadb-client --image $MARIADB_IMAGE -i --rm --restart=Never -- \
     mysql -h &quot;$PODIFIED_MARIADB_IP&quot; -uroot &quot;-p$PODIFIED_DB_ROOT_PASSWORD&quot; -e &#39;SHOW databases;&#39;
+oc run mariadb-client --image $MARIADB_IMAGE -i --rm --restart=Never -- \
+    mysql -h &quot;$PODIFIED_CELL1_MARIADB_IP&quot; -uroot &quot;-p$PODIFIED_DB_ROOT_PASSWORD&quot; -e &#39;SHOW databases;&#39;
 </code></pre></div>
 <h2 id="procedure-data-copy">Procedure - data copy<a class="headerlink" href="#procedure-data-copy" title="Permanent link">#</a></h2>
 <ul>
@@ -1001,31 +1010,60 @@ cd ~/adoption-db
 <ul>
 <li>Create a dump of the original databases:</li>
 </ul>
-<div class="highlight"><pre><span></span><code>podman run -i --rm --userns=keep-id -u $UID -v $PWD:$PWD:z,rw -w $PWD $MARIADB_IMAGE bash &lt;&lt;EOF
-
-mysql -h $SOURCE_MARIADB_IP -u root &quot;-p$SOURCE_DB_ROOT_PASSWORD&quot; -N -e &#39;show databases&#39; | while read dbname; do
-    echo &quot;Exporting \$dbname&quot;
-    mysqldump -h $SOURCE_MARIADB_IP -uroot &quot;-p$SOURCE_DB_ROOT_PASSWORD&quot; \
-        --single-transaction --complete-insert --skip-lock-tables --lock-tables=0 \
-        --databases &quot;\$dbname&quot; \
-        &gt; &quot;\$dbname&quot;.sql
-done
-
-EOF
-</code></pre></div>
-<ul>
-<li>Before restoring the databases from .sql files, we need to ensure that the neutron
-database name is "neutron" and not "ovs_neutron" by running the command:</li>
-</ul>
-<div class="highlight"><pre><span></span><code>sed -i &#39;/^CREATE DATABASE/s/ovs_neutron/neutron/g;/^USE/s/ovs_neutron/neutron/g&#39; ovs_neutron.sql
-</code></pre></div>
+<p>```
+  podman run -i --rm --userns=keep-id -u $UID -v $PWD:$PWD:z,rw -w $PWD $MARIADB_IMAGE bash &lt;&lt;EOF</p>
+<p># Note we do not want to dump the information and performance schema tables so we filter them
+  mysql -h ${SOURCE_MARIADB_IP} -u root "-p${SOURCE_DB_ROOT_PASSWORD}" -N -e 'show databases' | grep -E -v 'schema|mysql' | while read dbname; do
+      echo "Dumping \${dbname}"
+      mysqldump -h $SOURCE_MARIADB_IP -uroot "-p$SOURCE_DB_ROOT_PASSWORD" \
+          --single-transaction --complete-insert --skip-lock-tables --lock-tables=0 \
+          "\${dbname}" &gt; "\${dbname}".sql
+  done</p>
+<p>EOF
+  ```</p>
 <ul>
 <li>Restore the databases from .sql files into the podified MariaDB:</li>
 </ul>
-<div class="highlight"><pre><span></span><code>for dbname in cinder glance keystone nova_api nova_cell0 nova ovs_neutron placement; do
-    echo &quot;Importing $dbname&quot;
-    oc run mariadb-client --image $MARIADB_IMAGE -i --rm --restart=Never -- \
-       mysql -h &quot;$PODIFIED_MARIADB_IP&quot; -uroot &quot;-p$PODIFIED_DB_ROOT_PASSWORD&quot; &lt; &quot;$dbname.sql&quot;
+<div class="highlight"><pre><span></span><code># db schemas to rename on import
+declare -A db_name_map
+db_name_map[&quot;nova&quot;]=&quot;nova_cell1&quot;
+db_name_map[&quot;ovs_neutron&quot;]=&quot;neutron&quot;
+
+# db servers to import into
+declare -A db_server_map
+db_server_map[&quot;default&quot;]=${PODIFIED_MARIADB_IP}
+db_server_map[&quot;nova_cell1&quot;]=${PODIFIED_CELL1_MARIADB_IP}
+
+# db server root password map
+declare -A db_server_password_map
+db_server_password_map[&quot;default&quot;]=${PODIFIED_DB_ROOT_PASSWORD}
+db_server_password_map[&quot;nova_cell1&quot;]=${PODIFIED_DB_ROOT_PASSWORD}
+
+all_db_files=$(ls *.sql)
+for db_file in ${all_db_files}; do
+    db_name=$(echo ${db_file} | awk -F&#39;.&#39; &#39;{ print $1; }&#39;)
+    if [[ -v &quot;db_name_map[${db_name}]&quot; ]]; then
+        echo &quot;renaming ${db_name} to ${db_name_map[${db_name}]}&quot;
+        db_name=${db_name_map[${db_name}]}
+    fi
+    db_server=${db_server_map[&quot;default&quot;]}
+    if [[ -v &quot;db_server_map[${db_name}]&quot; ]]; then
+        db_server=${db_server_map[${db_name}]}
+    fi
+    db_password=${db_server_password_map[&quot;default&quot;]}
+    if [[ -v &quot;db_server_password_map[${db_name}]&quot; ]]; then
+        db_password=${db_server_password_map[${db_name}]}
+    fi
+    echo &quot;creating ${db_name} in ${db_server}&quot;
+    container_name=$(echo &quot;mariadb-client-${db_name}-create&quot; | sed &#39;s/_/-/g&#39;)
+    oc run ${container_name} --image ${MARIADB_IMAGE} -i --rm --restart=Never -- \
+        mysql -h &quot;${db_server}&quot; -uroot &quot;-p${db_password}&quot; &lt;&lt; EOF
+CREATE DATABASE IF NOT EXISTS ${db_name} DEFAULT CHARACTER SET ${CHARACTER_SET} DEFAULT COLLATE ${COLLATION};
+EOF
+    echo &quot;importing ${db_name} into ${db_server}&quot;
+    container_name=$(echo &quot;mariadb-client-${db_name}-restore&quot; | sed &#39;s/_/-/g&#39;)
+    oc run ${container_name} --image ${MARIADB_IMAGE} -i --rm --restart=Never -- \
+        mysql -h &quot;${db_server}&quot; -uroot &quot;-p${db_password}&quot; &quot;${db_name}&quot; &lt; &quot;${db_file}&quot;
 done
 </code></pre></div>
 <h2 id="post-checks">Post-checks<a class="headerlink" href="#post-checks" title="Permanent link">#</a></h2>
@@ -1033,7 +1071,16 @@ done
 <li>Check that the databases were imported correctly:</li>
 </ul>
 <div class="highlight"><pre><span></span><code>oc run mariadb-client --image $MARIADB_IMAGE -i --rm --restart=Never -- \
-   mysql -h &quot;$PODIFIED_MARIADB_IP&quot; -uroot &quot;-p$PODIFIED_DB_ROOT_PASSWORD&quot; -e &#39;SHOW databases;&#39;
+mysql -h &quot;${PODIFIED_MARIADB_IP}&quot; -uroot &quot;-p${PODIFIED_DB_ROOT_PASSWORD}&quot; -e &#39;SHOW databases;&#39; \
+    | grep keystone
+# ensure neutron db is renamed from ovs_neutron
+oc run mariadb-client --image $MARIADB_IMAGE -i --rm --restart=Never -- \
+mysql -h &quot;${PODIFIED_MARIADB_IP}&quot; -uroot &quot;-p${PODIFIED_DB_ROOT_PASSWORD}&quot; -e &#39;SHOW databases;&#39; \
+    | grep neutron
+# ensure nova cell1 db is extracted to a separate db server and renamed from nova to nova_cell1
+oc run mariadb-client --image $MARIADB_IMAGE -i --rm --restart=Never -- \
+mysql -h &quot;${PODIFIED_CELL1_MARIADB_IP}&quot; -uroot &quot;-p${PODIFIED_DB_ROOT_PASSWORD}&quot; -e &#39;SHOW databases;&#39; \
+    | grep nova_cell1
 </code></pre></div>
 <ul>
 <li>During the pre/post checks the pod <code>mariadb-client</code> might have returned a pod security warning
@@ -1048,7 +1095,7 @@ done
   <small>
     
       Last update:
-      2023-09-08
+      2023-09-13
     
   </small>
 </div>
