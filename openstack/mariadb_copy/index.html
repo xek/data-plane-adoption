@@ -1035,13 +1035,20 @@ done
 <div class="highlight"><pre><span></span><code>oc run mariadb-client --image $MARIADB_IMAGE -i --rm --restart=Never -- \
    mysql -h &quot;$PODIFIED_MARIADB_IP&quot; -uroot &quot;-p$PODIFIED_DB_ROOT_PASSWORD&quot; -e &#39;SHOW databases;&#39;
 </code></pre></div>
+<ul>
+<li>During the pre/post checks the pod <code>mariadb-client</code> might have returned a pod security warning
+  related to the <code>restricted:latest</code> security context constraint. This is due to default security
+  context constraints and will not prevent pod creation by the admission controller. You'll see a
+  warning for the short-lived pod but it will not interfere with functionality.
+  For more info <a href="https://learn.redhat.com/t5/DO280-Red-Hat-OpenShift/About-pod-security-standards-and-warnings/m-p/32502">visit here</a></li>
+</ul>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      2023-08-25
+      2023-09-08
     
   </small>
 </div>
