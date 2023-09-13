@@ -1066,24 +1066,24 @@ spec:
       value: &quot;True&quot;
     - name: ANSIBLE_ENABLE_TASK_DEBUGGER
       value: &quot;True&quot;
+  nodes:
+    standalone:
+      hostName: standalone
+      ansible:
+        ansibleHost: 192.168.122.100
+      networks:
+      - defaultRoute: true
+        fixedIP: 192.168.122.100
+        name: CtlPlane
+        subnetName: subnet1
+      - name: InternalApi
+        subnetName: subnet1
+      - name: Storage
+        subnetName: subnet1
+      - name: Tenant
+        subnetName: subnet1
   nodeTemplate:
     ansibleSSHPrivateKeySecret: dataplane-adoption-secret
-    nodes:
-      standalone:
-        hostName: standalone
-        ansible:
-          ansibleHost: 192.168.122.100
-        networks:
-        - defaultRoute: true
-          fixedIP: 192.168.122.100
-          name: CtlPlane
-          subnetName: subnet1
-        - name: InternalApi
-          subnetName: subnet1
-        - name: Storage
-          subnetName: subnet1
-        - name: Tenant
-          subnetName: subnet1
     managementNetwork: ctlplane
     ansible:
       ansibleUser: root
@@ -1168,7 +1168,7 @@ oc<span class="w"> </span>logs<span class="w"> </span>-l<span class="w"> </span>
   <small>
     
       Last update:
-      2023-09-08
+      2023-09-13
     
   </small>
 </div>
