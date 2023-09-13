@@ -914,6 +914,15 @@ samples are provided. To run the tests, follow this procedure:</p>
   <code>tests/secrets.sample.yaml</code>).</p>
 </li>
 <li>
+<p>Install dependencies and create a venv:
+  <div class="highlight"><pre><span></span><code>sudo dnf install python-devel
+python3 -m venv venv
+source venv/bin/activate
+pip install openstackclient osc_placement jmespath
+ansible-galaxy collection install community.general
+</code></pre></div></p>
+</li>
+<li>
 <p>Run <code>make test-minimal</code>.</p>
 </li>
 </ul>
@@ -937,7 +946,7 @@ syntax when using command or just use the shell module instead.</p>
   <small>
     
       Last update:
-      2023-09-05
+      2023-09-12
     
   </small>
 </div>
