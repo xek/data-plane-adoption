@@ -964,8 +964,8 @@ cluster.</p>
 just illustrative, use values that are correct for your environment:</p>
 <div class="highlight"><pre><span></span><code>MARIADB_IMAGE=quay.io/podified-antelope-centos9/openstack-mariadb:current-podified
 
-PODIFIED_MARIADB_IP=$(oc get -o yaml pod mariadb-openstack | grep podIP: | awk &#39;{ print $2; }&#39;)
-PODIFIED_CELL1_MARIADB_IP=$(oc get -o yaml pod  mariadb-openstack-cell1  | grep podIP: | awk &#39;{ print $2; }&#39;)
+PODIFIED_MARIADB_IP=$(oc get svc --selector &quot;cr=mariadb-openstack&quot; -ojsonpath=&#39;{.items[0].spec.clusterIP}&#39;)
+PODIFIED_CELL1_MARIADB_IP=$(oc get svc --selector &quot;cr=mariadb-openstack-cell1&quot; -ojsonpath=&#39;{.items[0].spec.clusterIP}&#39;)
 PODIFIED_DB_ROOT_PASSWORD=$(oc get -o json secret/osp-secret | jq -r .data.DbRootPassword | base64 -d)
 
 # Replace with your environment&#39;s MariaDB IP:
@@ -1095,7 +1095,7 @@ mysql -h &quot;${PODIFIED_CELL1_MARIADB_IP}&quot; -uroot &quot;-p${PODIFIED_DB_R
   <small>
     
       Last update:
-      2023-09-13
+      2023-09-12
     
   </small>
 </div>
