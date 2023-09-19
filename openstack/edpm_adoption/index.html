@@ -1058,8 +1058,6 @@ kind: OpenStackDataPlaneNodeSet
 metadata:
   name: openstack
 spec:
-  deployStrategy:
-    deploy: true
   networkAttachments:
       - ctlplane
   preProvisioned: true
@@ -1148,6 +1146,19 @@ spec:
         # SELinux module
         edpm_selinux_mode: enforcing
         plan: overcloud
+EOF
+</code></pre></div>
+<ul>
+<li>Deploy OpenStackDataPlaneDeployment:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>oc apply -f - &lt;&lt;EOF
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  name: openstack
+spec:
+  nodeSets:
+  - openstack
 EOF
 </code></pre></div>
 <h2 id="post-checks">Post-checks<a class="headerlink" href="#post-checks" title="Permanent link">#</a></h2>
