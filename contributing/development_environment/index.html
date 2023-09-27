@@ -1133,11 +1133,11 @@ the install_yamls <code>*_cleanup</code> targets. This is further detailed in
 the section:
 <a href="https://openstack-k8s-operators.github.io/data-plane-adoption/contributing/development_environment/#reset-the-environment-to-pre-adoption-state">Reset the environment to pre-adoption state</a></p>
 <h3 id="create-a-workload-to-adopt">Create a workload to adopt<a class="headerlink" href="#create-a-workload-to-adopt" title="Permanent link">#</a></h3>
-<p><div class="highlight"><pre><span></span><code>export OS_CLOUD=standalone
+<div class="highlight"><pre><span></span><code>export OS_CLOUD=standalone
 source ~/install_yamls/devsetup/scripts/edpm-deploy-instance.sh
 </code></pre></div>
-Confirm the image UUID can be seen in Ceph's images pool.
-<div class="highlight"><pre><span></span><code>sudo cephadm shell -- rbd -p images ls -l
+<p>Confirm the image UUID can be seen in Ceph's images pool.
+<div class="highlight"><pre><span></span><code>ssh -i ~/install_yamls/out/edpm/ansibleee-ssh-key-id_rsa root@192.168.122.100 sudo cephadm shell -- rbd -p images ls -l
 </code></pre></div></p>
 <p>Create a Cinder volume, a backup from it, and snapshot it.
 <div class="highlight"><pre><span></span><code>openstack volume create --image cirros --bootable --size 1 disk
@@ -1309,7 +1309,7 @@ The same pattern can be applied to other services.</p>
   <small>
     
       Last update:
-      2023-09-11
+      2023-09-20
     
   </small>
 </div>
