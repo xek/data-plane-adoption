@@ -799,6 +799,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#configuring-the-test-suite" class="md-nav__link">
+    Configuring the test suite
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#running-the-tests" class="md-nav__link">
     Running the tests
   </a>
@@ -806,8 +813,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#running-tests-on-systems-where-binsh-is-not-binbash" class="md-nav__link">
-    Running tests on systems where /bin/sh is not /bin/bash
+  <a href="#making-patches-to-the-test-suite" class="md-nav__link">
+    Making patches to the test suite
   </a>
   
 </li>
@@ -862,6 +869,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#configuring-the-test-suite" class="md-nav__link">
+    Configuring the test suite
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#running-the-tests" class="md-nav__link">
     Running the tests
   </a>
@@ -869,8 +883,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#running-tests-on-systems-where-binsh-is-not-binbash" class="md-nav__link">
-    Running tests on systems where /bin/sh is not /bin/bash
+  <a href="#making-patches-to-the-test-suite" class="md-nav__link">
+    Making patches to the test suite
   </a>
   
 </li>
@@ -896,63 +910,89 @@
 <h1 id="tests">Tests<a class="headerlink" href="#tests" title="Permanent link">#</a></h1>
 <h2 id="test-suite-information">Test suite information<a class="headerlink" href="#test-suite-information" title="Permanent link">#</a></h2>
 <p>The adoption docs repository also includes a test suite for Adoption.
-Currently, only one test target is defined:</p>
+There are targets in the Makefile which can be used to execute the
+test suite:</p>
 <ul>
-<li><code>minimal</code> - a minimal test scenario, the eventual set of services in
-  this scenario should be the "core" services needed to launch a VM
-  (without Ceph, to keep environment size requirements small and make
-  it easy to set up).</li>
+<li>
+<p><code>test-minimal</code> - a minimal test scenario, the eventual set of
+  services in this scenario should be the "core" services needed to
+  launch a VM. This scenario assumes local storage backend for
+  services like Glance and Cinder.</p>
+</li>
+<li>
+<p><code>test-with-ceph</code> - like 'minimal' but with Ceph storage backend for
+  Glance and Cinder.</p>
+</li>
 </ul>
-<p>We can add more scenarios as we go (e.g. one that includes Ceph).</p>
+<h2 id="configuring-the-test-suite">Configuring the test suite<a class="headerlink" href="#configuring-the-test-suite" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p>Create <code>tests/vars.yaml</code> and <code>tests/secrets.yaml</code> by copying the
+  included samples (<code>tests/vars.sample.yaml</code>,
+  <code>tests/secrets.sample.yaml</code>).</p>
+</li>
+<li>
+<p>Walk through the <code>tests/vars.yaml</code> and <code>tests/secrets.yaml</code> files
+  and see if you need to edit any values. If you are using the
+  documented development environment, majority of the defaults should
+  work out of the box. The comments in the YAML files will guide you
+  regarding the expected values. You may want to double check that
+  these variables suit your environment:</p>
+</li>
+<li>
+<p><code>install_yamls_path</code></p>
+</li>
+<li>
+<p><code>tripleo_passwords</code></p>
+</li>
+<li>
+<p><code>controller*_ssh</code></p>
+</li>
+<li>
+<p><code>edpm_privatekey_path</code></p>
+</li>
+<li>
+<p><code>edpm_chrony_ntp_servers</code></p>
+</li>
+</ul>
 <h2 id="running-the-tests">Running the tests<a class="headerlink" href="#running-the-tests" title="Permanent link">#</a></h2>
 <p>The interface between the execution infrastructure and the test suite
 is an Ansible inventory and variables files. Inventory and variable
 samples are provided. To run the tests, follow this procedure:</p>
 <ul>
-<li>
-<p>Create <code>tests/inventory.yaml</code> file by copying and editing one of the
-  included samples (e.g. <code>tests/inventory.sample-crc-vagrant.yaml</code>) to
-  provide values valid in your environment.</p>
-</li>
-<li>
-<p>Create <code>tests/vars.yaml</code> and <code>tests/secrets.yaml</code>, likewise by
-  copying and editing the included samples (<code>tests/vars.sample.yaml</code>,
-  <code>tests/secrets.sample.yaml</code>).</p>
-</li>
-<li>
-<p>Install dependencies and create a venv:
-  <div class="highlight"><pre><span></span><code>sudo dnf install python-devel
+<li>Install dependencies and create a venv:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>sudo dnf -y install python-devel
 python3 -m venv venv
 source venv/bin/activate
 pip install openstackclient osc_placement jmespath
 ansible-galaxy collection install community.general
-</code></pre></div></p>
-</li>
-<li>
-<p>Run <code>make test-minimal</code>.</p>
-</li>
-</ul>
-<h2 id="running-tests-on-systems-where-binsh-is-not-binbash">Running tests on systems where /bin/sh is not /bin/bash<a class="headerlink" href="#running-tests-on-systems-where-binsh-is-not-binbash" title="Permanent link">#</a></h2>
-<p>ansible.builtin.command and ansible.builtin.shell use /bin/sh by default.
-for portability reason when using either command or shell modules you should
-not assume /bin/sh is bash and assume it is simply a posix compliant shell</p>
-<p>In this repo that requirement is relax for the ansible.builtin.shell
-module as we configure module_defaults</p>
-<div class="highlight"><pre><span></span><code>  module_defaults:
-    ansible.builtin.shell:
-      executable: /bin/bash
 </code></pre></div>
-<p>module_defaults are configure per playbook play so if you are adding a new
-play or playbook you will need to copy this to ensure compatibility</p>
-<p>note the command module always uses /bin/sh so we should avoid bash specific
-syntax when using command or just use the shell module instead.</p>
+<ul>
+<li>Run <code>make test-with-ceph</code> (the documented development environment
+  does include Ceph).</li>
+</ul>
+<p>If you are using Ceph-less environment, you should run <code>make
+  test-minimal</code>.</p>
+<h2 id="making-patches-to-the-test-suite">Making patches to the test suite<a class="headerlink" href="#making-patches-to-the-test-suite" title="Permanent link">#</a></h2>
+<p>Please be aware of the following when changing the test suite:</p>
+<ul>
+<li>The test suite should follow the docs as much as possible.</li>
+</ul>
+<p>The purpose of the test suite is to verify what the user would run
+  if they were following the docs. We don't want to loosely rewrite
+  the docs into Ansible code following Ansible best practices. We want
+  to test the exact same bash commands/snippets that are written in
+  the docs. This often means that we should be using the <code>shell</code>
+  module and do a verbatim copy/paste from docs, instead of using the
+  best Ansible module for the task at hand.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      2023-09-12
+      2023-09-20
     
   </small>
 </div>
