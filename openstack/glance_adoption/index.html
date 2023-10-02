@@ -22,7 +22,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.2">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.3">
     
     
       
@@ -30,7 +30,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.d451bc0e.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.79e020e9.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.a5377069.min.css">
@@ -1004,16 +1004,22 @@ patch OpenStackControlPlane to deploy Glance:</p>
 spec:
   glance:
     enabled: true
+    apiOverride:
+      route: {}
     template:
       databaseInstance: openstack
       storageClass: &quot;local-storage&quot;
       storageRequest: 10G
       glanceAPIInternal:
-        externalEndpoints:
-        - endpoint: internal
-          ipAddressPool: internalapi
-          loadBalancerIPs:
-          - 172.17.0.80
+        override:
+          service:
+            metadata:
+              annotations:
+                metallb.universe.tf/address-pool: internalapi
+                metallb.universe.tf/allow-shared-ip: internalapi
+                metallb.universe.tf/loadBalancerIPs: 172.17.0.80
+            spec:
+              type: LoadBalancer
         networkAttachments:
         - storage
       glanceAPIExternal:
@@ -1050,11 +1056,15 @@ spec:
       storageClass: &quot;local-storage&quot;
       storageRequest: 10G
       glanceAPIInternal:
-        externalEndpoints:
-        - endpoint: internal
-          ipAddressPool: internalapi
-          loadBalancerIPs:
-          - 172.17.0.80
+        override:
+          service:
+            metadata:
+              annotations:
+                metallb.universe.tf/address-pool: internalapi
+                metallb.universe.tf/allow-shared-ip: internalapi
+                metallb.universe.tf/loadBalancerIPs: 172.17.0.80
+            spec:
+              type: LoadBalancer
         networkAttachments:
         - storage
       glanceAPIExternal:
@@ -1172,7 +1182,7 @@ c3158cad-d50b-452f-bec1-f250562f5c1f
   <small>
     
       Last update:
-      2023-08-16
+      2023-10-02
     
   </small>
 </div>
@@ -1213,10 +1223,11 @@ c3158cad-d50b-452f-bec1-f250562f5c1f
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
+    
     <script id="__config" type="application/json">{"base": "../..", "features": ["search.suggest", "search.highlight", "search.share"], "search": "../../assets/javascripts/workers/search.a264c092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.726fbb30.min.js"></script>
+      <script src="../../assets/javascripts/bundle.6eac0284.min.js"></script>
       
     
   </body>
