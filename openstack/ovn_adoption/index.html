@@ -969,12 +969,10 @@ just illustrative, use values that are correct for your environment:</p>
 <span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">template</span><span class="p p-Indicator">:</span>
 <span class="w">      </span><span class="nt">ovnDBCluster</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">ovndbcluster-nb</span><span class="p">:</span>
-<span class="w">          </span><span class="nt">containerImage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">quay.io/podified-antelope-centos9/openstack-ovn-nb-db-server:current-podified</span>
 <span class="w">          </span><span class="nt">dbType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NB</span>
 <span class="w">          </span><span class="nt">storageRequest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10G</span>
 <span class="w">          </span><span class="nt">networkAttachment</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">internalapi</span>
 <span class="w">        </span><span class="nt">ovndbcluster-sb</span><span class="p">:</span>
-<span class="w">          </span><span class="nt">containerImage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">quay.io/podified-antelope-centos9/openstack-ovn-sb-db-server:current-podified</span>
 <span class="w">          </span><span class="nt">dbType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SB</span>
 <span class="w">          </span><span class="nt">storageRequest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10G</span>
 <span class="w">          </span><span class="nt">networkAttachment</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">internalapi</span>
@@ -1035,7 +1033,6 @@ oc<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-i
 <span class="err">   </span><span class="w w-Error"> </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">template</span><span class="p p-Indicator">:</span>
 <span class="w">      </span><span class="nt">ovnNorthd</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">containerImage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">quay.io/podified-antelope-centos9/openstack-ovn-northd:current-podified</span>
 <span class="w">        </span><span class="nt">networkAttachment</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">internalapi</span>
 <span class="s">&#39;</span>
 </code></pre></div>
@@ -1045,7 +1042,7 @@ oc<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-i
   <small>
     
       Last update:
-      2023-08-08
+      2023-10-04
     
   </small>
 </div>
