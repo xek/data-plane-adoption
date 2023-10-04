@@ -1075,11 +1075,11 @@ Wallaby OpenStack in Standalone configuration.</p>
 <div class="highlight"><pre><span></span><code>git clone https://github.com/openstack-k8s-operators/install_yamls.git
 </code></pre></div>
 <p>Install tools for operator development:</p>
-<div class="highlight"><pre><span></span><code>cd install_yamls/devsetup
+<div class="highlight"><pre><span></span><code>cd ~/install_yamls/devsetup
 make download_tools
 </code></pre></div>
 <h2 id="deployment-of-crc-with-network-isolation">Deployment of CRC with network isolation<a class="headerlink" href="#deployment-of-crc-with-network-isolation" title="Permanent link">#</a></h2>
-<p><div class="highlight"><pre><span></span><code>cd install_yamls/devsetup
+<p><div class="highlight"><pre><span></span><code>cd ~/install_yamls/devsetup
 PULL_SECRET=$HOME/pull-secret.txt CPUS=12 MEMORY=40000 DISK=100 make crc
 
 eval $(crc oc-env)
@@ -1095,7 +1095,7 @@ make openstack
 Use the <a href="https://github.com/openstack-k8s-operators/install_yamls/tree/main/devsetup">install_yamls devsetup</a>
 to create a virtual machine connected to the isolated networks.</p>
 <p>Create the edpm-compute-0 virtual machine.
-<div class="highlight"><pre><span></span><code>cd install_yamls/devsetup
+<div class="highlight"><pre><span></span><code>cd ~/install_yamls/devsetup
 make standalone
 </code></pre></div></p>
 <h3 id="convenience-steps">Convenience steps<a class="headerlink" href="#convenience-steps" title="Permanent link">#</a></h3>
@@ -1119,12 +1119,12 @@ sudo ip link set up dev vlan20
 <p>When the deployment of the Standalone OpenStack is finished, it's a
 good time to snapshot the machine, so that multiple Adoption attempts
 can be done without having to deploy from scratch.</p>
-<div class="highlight"><pre><span></span><code>cd install_yamls/devsetup
+<div class="highlight"><pre><span></span><code>cd ~/install_yamls/devsetup
 make standalone_snapshot
 </code></pre></div>
 <p>And when you wish to revert the Standalone deployment to the
 snapshotted state:</p>
-<div class="highlight"><pre><span></span><code>cd install_yamls/devsetup
+<div class="highlight"><pre><span></span><code>cd ~/install_yamls/devsetup
 make standalone_revert
 </code></pre></div>
 <p>Similar snapshot could be done for the CRC virtual machine, but the
@@ -1160,7 +1160,7 @@ against your environment.</p>
 oc delete oscp openstack
 </code></pre></div></p>
 <p>Revert the standalone vm to the snapshotted state</p>
-<p><div class="highlight"><pre><span></span><code>cd install_yamls/devsetup
+<p><div class="highlight"><pre><span></span><code>cd ~/install_yamls/devsetup
 make standalone_revert
 </code></pre></div>
 Clean up and initialize the storage PVs in CRC vm
@@ -1309,7 +1309,7 @@ The same pattern can be applied to other services.</p>
   <small>
     
       Last update:
-      2023-09-20
+      2023-10-03
     
   </small>
 </div>

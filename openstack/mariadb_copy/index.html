@@ -975,7 +975,7 @@ PODIFIED_CELL1_MARIADB_IP=$(oc get svc --selector &quot;cr=mariadb-openstack-cel
 PODIFIED_DB_ROOT_PASSWORD=$(oc get -o json secret/osp-secret | jq -r .data.DbRootPassword | base64 -d)
 
 # Replace with your environment&#39;s MariaDB IP:
-SOURCE_MARIADB_IP=127.17.0.100
+SOURCE_MARIADB_IP=192.168.122.100
 SOURCE_DB_ROOT_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep &#39; MysqlRootPassword:&#39; | awk -F &#39;: &#39; &#39;{ print $2; }&#39;)
 
 # The CHARACTER_SET and collation should match the source DB
@@ -988,13 +988,13 @@ COLLATION=utf8_general_ci
 <ul>
 <li>Test connection to the original DB (show databases):</li>
 </ul>
-<div class="highlight"><pre><span></span><code>podman run -i --rm --userns=keep-id -u $UID -v $PWD:$PWD:z,rw -w $PWD $MARIADB_IMAGE \
+<div class="highlight"><pre><span></span><code>podman run -i --rm --userns=keep-id -u $UID $MARIADB_IMAGE \
     mysql -h &quot;$SOURCE_MARIADB_IP&quot; -uroot &quot;-p$SOURCE_DB_ROOT_PASSWORD&quot; -e &#39;SHOW databases;&#39;
 </code></pre></div>
 <ul>
 <li>Run mysqlcheck on the original DB to look for things that are not OK:</li>
 </ul>
-<div class="highlight"><pre><span></span><code>podman run -i --rm --userns=keep-id -u $UID -v $PWD:$PWD:z,rw -w $PWD $MARIADB_IMAGE \
+<div class="highlight"><pre><span></span><code>podman run -i --rm --userns=keep-id -u $UID $MARIADB_IMAGE \
     mysqlcheck --all-databases -h $SOURCE_MARIADB_IP -u root &quot;-p$SOURCE_DB_ROOT_PASSWORD&quot; | grep -v OK
 </code></pre></div>
 <ul>
@@ -1016,17 +1016,18 @@ cd ~/adoption-db
 <ul>
 <li>Create a dump of the original databases:</li>
 </ul>
-<p>```
-  podman run -i --rm --userns=keep-id -u $UID -v $PWD:$PWD:z,rw -w $PWD $MARIADB_IMAGE bash &lt;&lt;EOF</p>
-<p># Note we do not want to dump the information and performance schema tables so we filter them
-  mysql -h ${SOURCE_MARIADB_IP} -u root "-p${SOURCE_DB_ROOT_PASSWORD}" -N -e 'show databases' | grep -E -v 'schema|mysql' | while read dbname; do
-      echo "Dumping \${dbname}"
-      mysqldump -h $SOURCE_MARIADB_IP -uroot "-p$SOURCE_DB_ROOT_PASSWORD" \
-          --single-transaction --complete-insert --skip-lock-tables --lock-tables=0 \
-          "\${dbname}" &gt; "\${dbname}".sql
-  done</p>
-<p>EOF
-  ```</p>
+<div class="highlight"><pre><span></span><code>podman run -i --rm --userns=keep-id -u $UID -v $PWD:$PWD:z,rw -w $PWD $MARIADB_IMAGE bash &lt;&lt;EOF
+
+# Note we do not want to dump the information and performance schema tables so we filter them
+mysql -h ${SOURCE_MARIADB_IP} -u root &quot;-p${SOURCE_DB_ROOT_PASSWORD}&quot; -N -e &#39;show databases&#39; | grep -E -v &#39;schema|mysql&#39; | while read dbname; do
+    echo &quot;Dumping \${dbname}&quot;
+    mysqldump -h $SOURCE_MARIADB_IP -uroot &quot;-p$SOURCE_DB_ROOT_PASSWORD&quot; \
+        --single-transaction --complete-insert --skip-lock-tables --lock-tables=0 \
+        &quot;\${dbname}&quot; &gt; &quot;\${dbname}&quot;.sql
+done
+
+EOF
+</code></pre></div>
 <ul>
 <li>Restore the databases from .sql files into the podified MariaDB:</li>
 </ul>
@@ -1101,7 +1102,7 @@ mysql -h &quot;${PODIFIED_CELL1_MARIADB_IP}&quot; -uroot &quot;-p${PODIFIED_DB_R
   <small>
     
       Last update:
-      2023-09-12
+      2023-09-26
     
   </small>
 </div>
