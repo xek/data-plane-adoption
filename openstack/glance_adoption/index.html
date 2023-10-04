@@ -1076,7 +1076,7 @@ spec:
 <h3 id="test-the-glance-service-from-the-openstack-cli">Test the glance service from the OpenStack CLI<a class="headerlink" href="#test-the-glance-service-from-the-openstack-cli" title="Permanent link">#</a></h3>
 <p>Inspect the resulting glance pods:</p>
 <div class="highlight"><pre><span></span><code><span class="nv">GLANCE_POD</span><span class="o">=</span><span class="sb">`</span>oc<span class="w"> </span>get<span class="w"> </span>pod<span class="w"> </span><span class="p">|</span>grep<span class="w"> </span>glance-external-api<span class="w"> </span><span class="p">|</span><span class="w"> </span>cut<span class="w"> </span>-f<span class="w"> </span><span class="m">1</span><span class="w"> </span>-d<span class="s1">&#39; &#39;</span><span class="sb">`</span>
-oc<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-t<span class="w"> </span><span class="nv">$GLANCE_POD</span><span class="w"> </span>-c<span class="w"> </span>glance-api<span class="w"> </span>--<span class="w"> </span>cat<span class="w"> </span>/etc/glance/glance.conf.d/02-global.conf
+oc<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-t<span class="w"> </span><span class="nv">$GLANCE_POD</span><span class="w"> </span>-c<span class="w"> </span>glance-api<span class="w"> </span>--<span class="w"> </span>cat<span class="w"> </span>/etc/glance/glance.conf.d/02-config.conf
 
 <span class="o">[</span>DEFAULT<span class="o">]</span>
 <span class="nv">enabled_backends</span><span class="o">=</span>default_backend:rbd
@@ -1182,7 +1182,7 @@ c3158cad-d50b-452f-bec1-f250562f5c1f
   <small>
     
       Last update:
-      2023-10-02
+      2023-09-20
     
   </small>
 </div>
