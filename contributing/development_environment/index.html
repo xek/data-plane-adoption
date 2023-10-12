@@ -22,7 +22,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.3">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.5">
     
     
       
@@ -30,10 +30,10 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.79e020e9.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.6a10b989.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.a5377069.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.356b1318.min.css">
       
       
 
@@ -574,6 +574,26 @@
 
               
             
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../openstack/ironic_adoption/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Ironic adoption
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -789,6 +809,26 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#development-environment-with-openstack-ironic" class="md-nav__link">
+    Development environment with Openstack ironic
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#install-the-openstack-k8s-operators-openstack-operator" class="md-nav__link">
+    Install the openstack-k8s-operators (openstack-operator)
+  </a>
+  
+    <nav class="md-nav" aria-label="Install the openstack-k8s-operators (openstack-operator)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#convenience-steps" class="md-nav__link">
     Convenience steps
   </a>
@@ -954,6 +994,26 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#development-environment-with-openstack-ironic" class="md-nav__link">
+    Development environment with Openstack ironic
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#install-the-openstack-k8s-operators-openstack-operator" class="md-nav__link">
+    Install the openstack-k8s-operators (openstack-operator)
+  </a>
+  
+    <nav class="md-nav" aria-label="Install the openstack-k8s-operators (openstack-operator)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#convenience-steps" class="md-nav__link">
     Convenience steps
   </a>
@@ -1079,25 +1139,77 @@ Wallaby OpenStack in Standalone configuration.</p>
 make download_tools
 </code></pre></div>
 <h2 id="deployment-of-crc-with-network-isolation">Deployment of CRC with network isolation<a class="headerlink" href="#deployment-of-crc-with-network-isolation" title="Permanent link">#</a></h2>
-<p><div class="highlight"><pre><span></span><code>cd ~/install_yamls/devsetup
+<div class="highlight"><pre><span></span><code>cd ~/install_yamls/devsetup
 PULL_SECRET=$HOME/pull-secret.txt CPUS=12 MEMORY=40000 DISK=100 make crc
 
 eval $(crc oc-env)
 oc login -u kubeadmin -p 12345678 https://api.crc.testing:6443
 
 make crc_attach_default_interface
-
-cd ..  # back to install_yamls
-make crc_storage
-make input
-make openstack
 </code></pre></div>
-Use the <a href="https://github.com/openstack-k8s-operators/install_yamls/tree/main/devsetup">install_yamls devsetup</a>
+<hr />
+<h3 id="development-environment-with-openstack-ironic">Development environment with Openstack ironic<a class="headerlink" href="#development-environment-with-openstack-ironic" title="Permanent link">#</a></h3>
+<p>Create the BMaaS network (<code>crc-bmaas</code>) and virtual baremetal nodes controlled by
+a RedFish BMC emulator.</p>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>..<span class="w">  </span><span class="c1"># back to install_yamls</span>
+make<span class="w"> </span>nmstate
+make<span class="w"> </span>namespace
+<span class="nb">cd</span><span class="w"> </span>devsetup<span class="w">  </span><span class="c1"># back to install_yamls/devsetup</span>
+make<span class="w"> </span>bmaas<span class="w"> </span><span class="nv">BMAAS_INSTANCE_DISK_SIZE</span><span class="o">=</span><span class="m">2</span>
+</code></pre></div>
+<p>A node definition YAML file to use with the <code>openstack baremetal create
+&lt;file&gt;.yaml</code> command can be generated for the virtual baremetal nodes by
+running the <code>bmaas_generate_nodes_yaml</code> make target. Store it in a temp
+file for later.</p>
+<div class="highlight"><pre><span></span><code>make<span class="w"> </span>bmaas_generate_nodes_yaml<span class="w"> </span><span class="p">|</span><span class="w"> </span>tail<span class="w"> </span>-n<span class="w"> </span>+2<span class="w"> </span><span class="p">|</span><span class="w"> </span>tee<span class="w"> </span>/tmp/ironic_nodes.yaml
+</code></pre></div>
+<p>Set variables to deploy edpm Standalone with additional network
+(<code>baremetal</code>) and compute driver <code>ironic</code>.</p>
+<div class="highlight"><pre><span></span><code>cat<span class="w"> </span><span class="s">&lt;&lt; EOF &gt; /tmp/addtional_nets.json</span>
+<span class="s">[</span>
+<span class="s">  {</span>
+<span class="s">    &quot;type&quot;: &quot;network&quot;,</span>
+<span class="s">    &quot;name&quot;: &quot;crc-bmaas&quot;,</span>
+<span class="s">    &quot;standalone_config&quot;: {</span>
+<span class="s">      &quot;type&quot;: &quot;ovs_bridge&quot;,</span>
+<span class="s">      &quot;name&quot;: &quot;baremetal&quot;,</span>
+<span class="s">      &quot;mtu&quot;: 1500,</span>
+<span class="s">      &quot;vip&quot;: true,</span>
+<span class="s">      &quot;ip_subnet&quot;: &quot;172.20.1.0/24&quot;,</span>
+<span class="s">      &quot;allocation_pools&quot;: [</span>
+<span class="s">        {</span>
+<span class="s">          &quot;start&quot;: &quot;172.20.1.100&quot;,</span>
+<span class="s">          &quot;end&quot;: &quot;172.20.1.150&quot;</span>
+<span class="s">        }</span>
+<span class="s">      ],</span>
+<span class="s">      &quot;host_routes&quot;: [</span>
+<span class="s">        {</span>
+<span class="s">          &quot;destination&quot;: &quot;192.168.130.0/24&quot;,</span>
+<span class="s">          &quot;nexthop&quot;: &quot;172.20.1.1&quot;</span>
+<span class="s">        }</span>
+<span class="s">      ]</span>
+<span class="s">    }</span>
+<span class="s">  }</span>
+<span class="s">]</span>
+<span class="s">EOF</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">EDPM_COMPUTE_ADDITIONAL_NETWORKS</span><span class="o">=</span><span class="k">$(</span>jq<span class="w"> </span>-c<span class="w"> </span>.<span class="w"> </span>/tmp/addtional_nets.json<span class="k">)</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">STANDALONE_COMPUTE_DRIVER</span><span class="o">=</span>ironic
+<span class="nb">export</span><span class="w"> </span><span class="nv">NTP_SERVER</span><span class="o">=</span>pool.ntp.org<span class="w">  </span><span class="c1"># Only neccecary if not on the RedHat network ...</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">EDPM_COMPUTE_CEPH_ENABLED</span><span class="o">=</span><span class="nb">false</span><span class="w">  </span><span class="c1"># Optional</span>
+</code></pre></div>
+<hr />
+<p>Use the <a href="https://github.com/openstack-k8s-operators/install_yamls/tree/main/devsetup">install_yamls devsetup</a>
 to create a virtual machine connected to the isolated networks.</p>
-<p>Create the edpm-compute-0 virtual machine.
-<div class="highlight"><pre><span></span><code>cd ~/install_yamls/devsetup
-make standalone
-</code></pre></div></p>
+<p>Create the edpm-compute-0 virtual machine.</p>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>install_yamls/devsetup
+make<span class="w"> </span>standalone
+</code></pre></div>
+<h2 id="install-the-openstack-k8s-operators-openstack-operator">Install the openstack-k8s-operators (openstack-operator)<a class="headerlink" href="#install-the-openstack-k8s-operators-openstack-operator" title="Permanent link">#</a></h2>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>..<span class="w">  </span><span class="c1"># back to install_yamls</span>
+make<span class="w"> </span>crc_storage
+make<span class="w"> </span>input
+make<span class="w"> </span>openstack
+</code></pre></div>
 <h3 id="convenience-steps">Convenience steps<a class="headerlink" href="#convenience-steps" title="Permanent link">#</a></h3>
 <p>To make our life easier we can copy the deployment passwords we'll be using
 in the <a href="https://openstack-k8s-operators.github.io/data-plane-adoption/openstack/backend_services_deployment/">backend services deployment phase of the data plane adoption</a>.</p>
@@ -1308,7 +1420,7 @@ The same pattern can be applied to other services.</p>
   <small>
     
       Last update:
-      2023-10-04
+      2023-10-10
     
   </small>
 </div>
@@ -1350,10 +1462,10 @@ The same pattern can be applied to other services.</p>
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["search.suggest", "search.highlight", "search.share"], "search": "../../assets/javascripts/workers/search.a264c092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["search.suggest", "search.highlight", "search.share"], "search": "../../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.6eac0284.min.js"></script>
+      <script src="../../assets/javascripts/bundle.aecac24b.min.js"></script>
       
     
   </body>
