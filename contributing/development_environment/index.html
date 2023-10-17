@@ -22,7 +22,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.5">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.6">
     
     
       
@@ -30,7 +30,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.6a10b989.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.35e1ed30.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.356b1318.min.css">
@@ -854,10 +854,95 @@
     Create a workload to adopt
   </a>
   
+    <nav class="md-nav" aria-label="Create a workload to adopt">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ironic-steps" class="md-nav__link">
+    Ironic Steps
+  </a>
+  
 </li>
         
       </ul>
     </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#enroll-baremetal-nodes-make-bmaas_generate_nodes_yaml-tail-n-2-tee-tmpironic_nodesyaml-scp-i-homeinstall_yamlsoutedpmansibleee-ssh-key-id_rsa-tmpironic_nodesyaml-root192168122100-ssh-i-homeinstall_yamlsoutedpmansibleee-ssh-key-id_rsa-root192168122100-export-os_cloudstandalone-openstack-baremetal-create-rootironic_nodesyaml-export-ironic_python_agent_ramdisk_idopenstack-image-show-deploy-ramdisk-c-id-f-value-export-ironic_python_agent_kernel_idopenstack-image-show-deploy-kernel-c-id-f-value-for-node-in-openstack-baremetal-node-list-c-uuid-f-value-do-openstack-baremetal-node-set-node-driver-info-deploy_ramdiskironic_python_agent_ramdisk_id-driver-info-deploy_kernelironic_python_agent_kernel_id-resource-class-baremetal-property-capabilitiesboot_modeuefi-done-create-a-baremetal-flavor-openstack-flavor-create-baremetal-ram-1024-vcpus-1-disk-15-property-resourcesvcpu0-property-resourcesmemory_mb0-property-resourcesdisk_gb0-property-resourcescustom_baremetal1-property-capabilitiesboot_modeuefi-create-image-imgfedora-cloud-base-38-16x86_64qcow2-urlhttpsdownloadfedoraprojectorgpubfedoralinuxreleases38cloudx86_64imagesimg-curl-o-tmpimg-l-url-disk_formatqemu-img-info-tmpimg-grep-file-format-awk-print-nf-openstack-image-create-container-format-bare-disk-format-disk_format-fedora-cloud-base-38-tmpimg-export-baremetal_nodesopenstack-baremetal-node-list-c-uuid-f-value-manage-nodes-for-node-in-baremetal_nodes-do-openstack-baremetal-node-manage-node-done-wait-for-nodes-to-reach-manageable-state-watch-openstack-baremetal-node-list-inspect-baremetal-nodes-for-node-in-baremetal_nodes-do-openstack-baremetal-introspection-start-node-done-wait-for-inspection-to-complete-watch-openstack-baremetal-introspection-list-provide-nodes-for-node-in-baremetal_nodes-do-openstack-baremetal-node-provide-node-done-wait-for-nodes-to-reach-available-state-watch-openstack-baremetal-node-list-create-an-instance-on-baremetal-openstack-server-show-baremetal-test-openstack-server-create-baremetal-test-flavor-baremetal-image-fedora-cloud-base-38-nic-net-idprovisioning-wait-check-instance-status-and-network-connectivity-openstack-server-show-baremetal-test-ping-c-4-openstack-server-show-baremetal-test-f-json-c-addresses-jq-r-addressesprovisioning0" class="md-nav__link">
+    # Enroll baremetal nodes
+make bmaas_generate_nodes_yaml | tail -n +2 | tee /tmp/ironic_nodes.yaml
+scp -i $HOME/install_yamls/out/edpm/ansibleee-ssh-key-id_rsa /tmp/ironic_nodes.yaml root@192.168.122.100:
+ssh -i $HOME/install_yamls/out/edpm/ansibleee-ssh-key-id_rsa root@192.168.122.100
+
+export OS_CLOUD=standalone
+openstack baremetal create /root/ironic_nodes.yaml
+export IRONIC_PYTHON_AGENT_RAMDISK_ID=$(openstack image show deploy-ramdisk -c id -f value)
+export IRONIC_PYTHON_AGENT_KERNEL_ID=$(openstack image show deploy-kernel -c id -f value)
+for node in $(openstack baremetal node list -c UUID -f value); do
+  openstack baremetal node set $node \
+    --driver-info deploy_ramdisk=${IRONIC_PYTHON_AGENT_RAMDISK_ID} \
+    --driver-info deploy_kernel=${IRONIC_PYTHON_AGENT_KERNEL_ID} \
+    --resource-class baremetal \
+    --property capabilities=&#39;boot_mode:uefi&#39;
+done
+
+# Create a baremetal flavor
+openstack flavor create baremetal --ram 1024 --vcpus 1 --disk 15 \
+  --property resources:VCPU=0 \
+  --property resources:MEMORY_MB=0 \
+  --property resources:DISK_GB=0 \
+  --property resources:CUSTOM_BAREMETAL=1 \
+  --property capabilities:boot_mode=&quot;uefi&quot;
+
+# Create image
+IMG=Fedora-Cloud-Base-38-1.6.x86_64.qcow2
+URL=https://download.fedoraproject.org/pub/fedora/linux/releases/38/Cloud/x86_64/images/$IMG
+curl -o /tmp/${IMG} -L $URL
+DISK_FORMAT=$(qemu-img info /tmp/${IMG} | grep &quot;file format:&quot; | awk &#39;{print $NF}&#39;)
+openstack image create --container-format bare --disk-format ${DISK_FORMAT} Fedora-Cloud-Base-38 &lt; /tmp/${IMG}
+
+export BAREMETAL_NODES=$(openstack baremetal node list -c UUID -f value)
+# Manage nodes
+for node in $BAREMETAL_NODES; do
+  openstack baremetal node manage $node
+done
+
+# Wait for nodes to reach &quot;manageable&quot; state
+watch openstack baremetal node list
+
+# Inspect baremetal nodes
+for node in $BAREMETAL_NODES; do
+  openstack baremetal introspection start $node
+done
+
+# Wait for inspection to complete
+watch openstack baremetal introspection list
+
+# Provide nodes
+for node in $BAREMETAL_NODES; do
+  openstack baremetal node provide $node
+done
+
+# Wait for nodes to reach &quot;available&quot; state
+watch openstack baremetal node list
+
+# Create an instance on baremetal
+openstack server show baremetal-test || {
+    openstack server create baremetal-test --flavor baremetal --image Fedora-Cloud-Base-38 --nic net-id=provisioning --wait
+}
+
+# Check instance status and network connectivity
+openstack server show baremetal-test
+ping -c 4 $(openstack server show baremetal-test -f json -c addresses | jq -r .addresses.provisioning[0])
+
+  </a>
   
 </li>
       
@@ -1039,10 +1124,95 @@
     Create a workload to adopt
   </a>
   
+    <nav class="md-nav" aria-label="Create a workload to adopt">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ironic-steps" class="md-nav__link">
+    Ironic Steps
+  </a>
+  
 </li>
         
       </ul>
     </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#enroll-baremetal-nodes-make-bmaas_generate_nodes_yaml-tail-n-2-tee-tmpironic_nodesyaml-scp-i-homeinstall_yamlsoutedpmansibleee-ssh-key-id_rsa-tmpironic_nodesyaml-root192168122100-ssh-i-homeinstall_yamlsoutedpmansibleee-ssh-key-id_rsa-root192168122100-export-os_cloudstandalone-openstack-baremetal-create-rootironic_nodesyaml-export-ironic_python_agent_ramdisk_idopenstack-image-show-deploy-ramdisk-c-id-f-value-export-ironic_python_agent_kernel_idopenstack-image-show-deploy-kernel-c-id-f-value-for-node-in-openstack-baremetal-node-list-c-uuid-f-value-do-openstack-baremetal-node-set-node-driver-info-deploy_ramdiskironic_python_agent_ramdisk_id-driver-info-deploy_kernelironic_python_agent_kernel_id-resource-class-baremetal-property-capabilitiesboot_modeuefi-done-create-a-baremetal-flavor-openstack-flavor-create-baremetal-ram-1024-vcpus-1-disk-15-property-resourcesvcpu0-property-resourcesmemory_mb0-property-resourcesdisk_gb0-property-resourcescustom_baremetal1-property-capabilitiesboot_modeuefi-create-image-imgfedora-cloud-base-38-16x86_64qcow2-urlhttpsdownloadfedoraprojectorgpubfedoralinuxreleases38cloudx86_64imagesimg-curl-o-tmpimg-l-url-disk_formatqemu-img-info-tmpimg-grep-file-format-awk-print-nf-openstack-image-create-container-format-bare-disk-format-disk_format-fedora-cloud-base-38-tmpimg-export-baremetal_nodesopenstack-baremetal-node-list-c-uuid-f-value-manage-nodes-for-node-in-baremetal_nodes-do-openstack-baremetal-node-manage-node-done-wait-for-nodes-to-reach-manageable-state-watch-openstack-baremetal-node-list-inspect-baremetal-nodes-for-node-in-baremetal_nodes-do-openstack-baremetal-introspection-start-node-done-wait-for-inspection-to-complete-watch-openstack-baremetal-introspection-list-provide-nodes-for-node-in-baremetal_nodes-do-openstack-baremetal-node-provide-node-done-wait-for-nodes-to-reach-available-state-watch-openstack-baremetal-node-list-create-an-instance-on-baremetal-openstack-server-show-baremetal-test-openstack-server-create-baremetal-test-flavor-baremetal-image-fedora-cloud-base-38-nic-net-idprovisioning-wait-check-instance-status-and-network-connectivity-openstack-server-show-baremetal-test-ping-c-4-openstack-server-show-baremetal-test-f-json-c-addresses-jq-r-addressesprovisioning0" class="md-nav__link">
+    # Enroll baremetal nodes
+make bmaas_generate_nodes_yaml | tail -n +2 | tee /tmp/ironic_nodes.yaml
+scp -i $HOME/install_yamls/out/edpm/ansibleee-ssh-key-id_rsa /tmp/ironic_nodes.yaml root@192.168.122.100:
+ssh -i $HOME/install_yamls/out/edpm/ansibleee-ssh-key-id_rsa root@192.168.122.100
+
+export OS_CLOUD=standalone
+openstack baremetal create /root/ironic_nodes.yaml
+export IRONIC_PYTHON_AGENT_RAMDISK_ID=$(openstack image show deploy-ramdisk -c id -f value)
+export IRONIC_PYTHON_AGENT_KERNEL_ID=$(openstack image show deploy-kernel -c id -f value)
+for node in $(openstack baremetal node list -c UUID -f value); do
+  openstack baremetal node set $node \
+    --driver-info deploy_ramdisk=${IRONIC_PYTHON_AGENT_RAMDISK_ID} \
+    --driver-info deploy_kernel=${IRONIC_PYTHON_AGENT_KERNEL_ID} \
+    --resource-class baremetal \
+    --property capabilities=&#39;boot_mode:uefi&#39;
+done
+
+# Create a baremetal flavor
+openstack flavor create baremetal --ram 1024 --vcpus 1 --disk 15 \
+  --property resources:VCPU=0 \
+  --property resources:MEMORY_MB=0 \
+  --property resources:DISK_GB=0 \
+  --property resources:CUSTOM_BAREMETAL=1 \
+  --property capabilities:boot_mode=&quot;uefi&quot;
+
+# Create image
+IMG=Fedora-Cloud-Base-38-1.6.x86_64.qcow2
+URL=https://download.fedoraproject.org/pub/fedora/linux/releases/38/Cloud/x86_64/images/$IMG
+curl -o /tmp/${IMG} -L $URL
+DISK_FORMAT=$(qemu-img info /tmp/${IMG} | grep &quot;file format:&quot; | awk &#39;{print $NF}&#39;)
+openstack image create --container-format bare --disk-format ${DISK_FORMAT} Fedora-Cloud-Base-38 &lt; /tmp/${IMG}
+
+export BAREMETAL_NODES=$(openstack baremetal node list -c UUID -f value)
+# Manage nodes
+for node in $BAREMETAL_NODES; do
+  openstack baremetal node manage $node
+done
+
+# Wait for nodes to reach &quot;manageable&quot; state
+watch openstack baremetal node list
+
+# Inspect baremetal nodes
+for node in $BAREMETAL_NODES; do
+  openstack baremetal introspection start $node
+done
+
+# Wait for inspection to complete
+watch openstack baremetal introspection list
+
+# Provide nodes
+for node in $BAREMETAL_NODES; do
+  openstack baremetal node provide $node
+done
+
+# Wait for nodes to reach &quot;available&quot; state
+watch openstack baremetal node list
+
+# Create an instance on baremetal
+openstack server show baremetal-test || {
+    openstack server create baremetal-test --flavor baremetal --image Fedora-Cloud-Base-38 --nic net-id=provisioning --wait
+}
+
+# Check instance status and network connectivity
+openstack server show baremetal-test
+ping -c 4 $(openstack server show baremetal-test -f json -c addresses | jq -r .addresses.provisioning[0])
+
+  </a>
   
 </li>
       
@@ -1155,7 +1325,7 @@ a RedFish BMC emulator.</p>
 make<span class="w"> </span>nmstate
 make<span class="w"> </span>namespace
 <span class="nb">cd</span><span class="w"> </span>devsetup<span class="w">  </span><span class="c1"># back to install_yamls/devsetup</span>
-make<span class="w"> </span>bmaas<span class="w"> </span><span class="nv">BMAAS_INSTANCE_DISK_SIZE</span><span class="o">=</span><span class="m">2</span>
+make<span class="w"> </span>bmaas
 </code></pre></div>
 <p>A node definition YAML file to use with the <code>openstack baremetal create
 &lt;file&gt;.yaml</code> command can be generated for the virtual baremetal nodes by
@@ -1245,6 +1415,74 @@ the install_yamls <code>*_cleanup</code> targets. This is further detailed in
 the section:
 <a href="https://openstack-k8s-operators.github.io/data-plane-adoption/contributing/development_environment/#reset-the-environment-to-pre-adoption-state">Reset the environment to pre-adoption state</a></p>
 <h3 id="create-a-workload-to-adopt">Create a workload to adopt<a class="headerlink" href="#create-a-workload-to-adopt" title="Permanent link">#</a></h3>
+<hr />
+<h4 id="ironic-steps">Ironic Steps<a class="headerlink" href="#ironic-steps" title="Permanent link">#</a></h4>
+<h2 id="enroll-baremetal-nodes-make-bmaas_generate_nodes_yaml-tail-n-2-tee-tmpironic_nodesyaml-scp-i-homeinstall_yamlsoutedpmansibleee-ssh-key-id_rsa-tmpironic_nodesyaml-root192168122100-ssh-i-homeinstall_yamlsoutedpmansibleee-ssh-key-id_rsa-root192168122100-export-os_cloudstandalone-openstack-baremetal-create-rootironic_nodesyaml-export-ironic_python_agent_ramdisk_idopenstack-image-show-deploy-ramdisk-c-id-f-value-export-ironic_python_agent_kernel_idopenstack-image-show-deploy-kernel-c-id-f-value-for-node-in-openstack-baremetal-node-list-c-uuid-f-value-do-openstack-baremetal-node-set-node-driver-info-deploy_ramdiskironic_python_agent_ramdisk_id-driver-info-deploy_kernelironic_python_agent_kernel_id-resource-class-baremetal-property-capabilitiesboot_modeuefi-done-create-a-baremetal-flavor-openstack-flavor-create-baremetal-ram-1024-vcpus-1-disk-15-property-resourcesvcpu0-property-resourcesmemory_mb0-property-resourcesdisk_gb0-property-resourcescustom_baremetal1-property-capabilitiesboot_modeuefi-create-image-imgfedora-cloud-base-38-16x86_64qcow2-urlhttpsdownloadfedoraprojectorgpubfedoralinuxreleases38cloudx86_64imagesimg-curl-o-tmpimg-l-url-disk_formatqemu-img-info-tmpimg-grep-file-format-awk-print-nf-openstack-image-create-container-format-bare-disk-format-disk_format-fedora-cloud-base-38-tmpimg-export-baremetal_nodesopenstack-baremetal-node-list-c-uuid-f-value-manage-nodes-for-node-in-baremetal_nodes-do-openstack-baremetal-node-manage-node-done-wait-for-nodes-to-reach-manageable-state-watch-openstack-baremetal-node-list-inspect-baremetal-nodes-for-node-in-baremetal_nodes-do-openstack-baremetal-introspection-start-node-done-wait-for-inspection-to-complete-watch-openstack-baremetal-introspection-list-provide-nodes-for-node-in-baremetal_nodes-do-openstack-baremetal-node-provide-node-done-wait-for-nodes-to-reach-available-state-watch-openstack-baremetal-node-list-create-an-instance-on-baremetal-openstack-server-show-baremetal-test-openstack-server-create-baremetal-test-flavor-baremetal-image-fedora-cloud-base-38-nic-net-idprovisioning-wait-check-instance-status-and-network-connectivity-openstack-server-show-baremetal-test-ping-c-4-openstack-server-show-baremetal-test-f-json-c-addresses-jq-r-addressesprovisioning0"><div class="highlight"><pre><span></span><code><span class="c1"># Enroll baremetal nodes</span>
+make<span class="w"> </span>bmaas_generate_nodes_yaml<span class="w"> </span><span class="p">|</span><span class="w"> </span>tail<span class="w"> </span>-n<span class="w"> </span>+2<span class="w"> </span><span class="p">|</span><span class="w"> </span>tee<span class="w"> </span>/tmp/ironic_nodes.yaml
+scp<span class="w"> </span>-i<span class="w"> </span><span class="nv">$HOME</span>/install_yamls/out/edpm/ansibleee-ssh-key-id_rsa<span class="w"> </span>/tmp/ironic_nodes.yaml<span class="w"> </span>root@192.168.122.100:
+ssh<span class="w"> </span>-i<span class="w"> </span><span class="nv">$HOME</span>/install_yamls/out/edpm/ansibleee-ssh-key-id_rsa<span class="w"> </span>root@192.168.122.100
+
+<span class="nb">export</span><span class="w"> </span><span class="nv">OS_CLOUD</span><span class="o">=</span>standalone
+openstack<span class="w"> </span>baremetal<span class="w"> </span>create<span class="w"> </span>/root/ironic_nodes.yaml
+<span class="nb">export</span><span class="w"> </span><span class="nv">IRONIC_PYTHON_AGENT_RAMDISK_ID</span><span class="o">=</span><span class="k">$(</span>openstack<span class="w"> </span>image<span class="w"> </span>show<span class="w"> </span>deploy-ramdisk<span class="w"> </span>-c<span class="w"> </span>id<span class="w"> </span>-f<span class="w"> </span>value<span class="k">)</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">IRONIC_PYTHON_AGENT_KERNEL_ID</span><span class="o">=</span><span class="k">$(</span>openstack<span class="w"> </span>image<span class="w"> </span>show<span class="w"> </span>deploy-kernel<span class="w"> </span>-c<span class="w"> </span>id<span class="w"> </span>-f<span class="w"> </span>value<span class="k">)</span>
+<span class="k">for</span><span class="w"> </span>node<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="k">$(</span>openstack<span class="w"> </span>baremetal<span class="w"> </span>node<span class="w"> </span>list<span class="w"> </span>-c<span class="w"> </span>UUID<span class="w"> </span>-f<span class="w"> </span>value<span class="k">)</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">  </span>openstack<span class="w"> </span>baremetal<span class="w"> </span>node<span class="w"> </span><span class="nb">set</span><span class="w"> </span><span class="nv">$node</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--driver-info<span class="w"> </span><span class="nv">deploy_ramdisk</span><span class="o">=</span><span class="si">${</span><span class="nv">IRONIC_PYTHON_AGENT_RAMDISK_ID</span><span class="si">}</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--driver-info<span class="w"> </span><span class="nv">deploy_kernel</span><span class="o">=</span><span class="si">${</span><span class="nv">IRONIC_PYTHON_AGENT_KERNEL_ID</span><span class="si">}</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--resource-class<span class="w"> </span>baremetal<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--property<span class="w"> </span><span class="nv">capabilities</span><span class="o">=</span><span class="s1">&#39;boot_mode:uefi&#39;</span>
+<span class="k">done</span>
+
+<span class="c1"># Create a baremetal flavor</span>
+openstack<span class="w"> </span>flavor<span class="w"> </span>create<span class="w"> </span>baremetal<span class="w"> </span>--ram<span class="w"> </span><span class="m">1024</span><span class="w"> </span>--vcpus<span class="w"> </span><span class="m">1</span><span class="w"> </span>--disk<span class="w"> </span><span class="m">15</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--property<span class="w"> </span>resources:VCPU<span class="o">=</span><span class="m">0</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--property<span class="w"> </span>resources:MEMORY_MB<span class="o">=</span><span class="m">0</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--property<span class="w"> </span>resources:DISK_GB<span class="o">=</span><span class="m">0</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--property<span class="w"> </span>resources:CUSTOM_BAREMETAL<span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--property<span class="w"> </span>capabilities:boot_mode<span class="o">=</span><span class="s2">&quot;uefi&quot;</span>
+
+<span class="c1"># Create image</span>
+<span class="nv">IMG</span><span class="o">=</span>Fedora-Cloud-Base-38-1.6.x86_64.qcow2
+<span class="nv">URL</span><span class="o">=</span>https://download.fedoraproject.org/pub/fedora/linux/releases/38/Cloud/x86_64/images/<span class="nv">$IMG</span>
+curl<span class="w"> </span>-o<span class="w"> </span>/tmp/<span class="si">${</span><span class="nv">IMG</span><span class="si">}</span><span class="w"> </span>-L<span class="w"> </span><span class="nv">$URL</span>
+<span class="nv">DISK_FORMAT</span><span class="o">=</span><span class="k">$(</span>qemu-img<span class="w"> </span>info<span class="w"> </span>/tmp/<span class="si">${</span><span class="nv">IMG</span><span class="si">}</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;file format:&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span><span class="s1">&#39;{print $NF}&#39;</span><span class="k">)</span>
+openstack<span class="w"> </span>image<span class="w"> </span>create<span class="w"> </span>--container-format<span class="w"> </span>bare<span class="w"> </span>--disk-format<span class="w"> </span><span class="si">${</span><span class="nv">DISK_FORMAT</span><span class="si">}</span><span class="w"> </span>Fedora-Cloud-Base-38<span class="w"> </span>&lt;<span class="w"> </span>/tmp/<span class="si">${</span><span class="nv">IMG</span><span class="si">}</span>
+
+<span class="nb">export</span><span class="w"> </span><span class="nv">BAREMETAL_NODES</span><span class="o">=</span><span class="k">$(</span>openstack<span class="w"> </span>baremetal<span class="w"> </span>node<span class="w"> </span>list<span class="w"> </span>-c<span class="w"> </span>UUID<span class="w"> </span>-f<span class="w"> </span>value<span class="k">)</span>
+<span class="c1"># Manage nodes</span>
+<span class="k">for</span><span class="w"> </span>node<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="nv">$BAREMETAL_NODES</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">  </span>openstack<span class="w"> </span>baremetal<span class="w"> </span>node<span class="w"> </span>manage<span class="w"> </span><span class="nv">$node</span>
+<span class="k">done</span>
+
+<span class="c1"># Wait for nodes to reach &quot;manageable&quot; state</span>
+watch<span class="w"> </span>openstack<span class="w"> </span>baremetal<span class="w"> </span>node<span class="w"> </span>list
+
+<span class="c1"># Inspect baremetal nodes</span>
+<span class="k">for</span><span class="w"> </span>node<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="nv">$BAREMETAL_NODES</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">  </span>openstack<span class="w"> </span>baremetal<span class="w"> </span>introspection<span class="w"> </span>start<span class="w"> </span><span class="nv">$node</span>
+<span class="k">done</span>
+
+<span class="c1"># Wait for inspection to complete</span>
+watch<span class="w"> </span>openstack<span class="w"> </span>baremetal<span class="w"> </span>introspection<span class="w"> </span>list
+
+<span class="c1"># Provide nodes</span>
+<span class="k">for</span><span class="w"> </span>node<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="nv">$BAREMETAL_NODES</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">  </span>openstack<span class="w"> </span>baremetal<span class="w"> </span>node<span class="w"> </span>provide<span class="w"> </span><span class="nv">$node</span>
+<span class="k">done</span>
+
+<span class="c1"># Wait for nodes to reach &quot;available&quot; state</span>
+watch<span class="w"> </span>openstack<span class="w"> </span>baremetal<span class="w"> </span>node<span class="w"> </span>list
+
+<span class="c1"># Create an instance on baremetal</span>
+openstack<span class="w"> </span>server<span class="w"> </span>show<span class="w"> </span>baremetal-test<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="o">{</span>
+<span class="w">    </span>openstack<span class="w"> </span>server<span class="w"> </span>create<span class="w"> </span>baremetal-test<span class="w"> </span>--flavor<span class="w"> </span>baremetal<span class="w"> </span>--image<span class="w"> </span>Fedora-Cloud-Base-38<span class="w"> </span>--nic<span class="w"> </span>net-id<span class="o">=</span>provisioning<span class="w"> </span>--wait
+<span class="o">}</span>
+
+<span class="c1"># Check instance status and network connectivity</span>
+openstack<span class="w"> </span>server<span class="w"> </span>show<span class="w"> </span>baremetal-test
+ping<span class="w"> </span>-c<span class="w"> </span><span class="m">4</span><span class="w"> </span><span class="k">$(</span>openstack<span class="w"> </span>server<span class="w"> </span>show<span class="w"> </span>baremetal-test<span class="w"> </span>-f<span class="w"> </span>json<span class="w"> </span>-c<span class="w"> </span>addresses<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span>.addresses.provisioning<span class="o">[</span><span class="m">0</span><span class="o">]</span><span class="k">)</span>
+</code></pre></div><a class="headerlink" href="#enroll-baremetal-nodes-make-bmaas_generate_nodes_yaml-tail-n-2-tee-tmpironic_nodesyaml-scp-i-homeinstall_yamlsoutedpmansibleee-ssh-key-id_rsa-tmpironic_nodesyaml-root192168122100-ssh-i-homeinstall_yamlsoutedpmansibleee-ssh-key-id_rsa-root192168122100-export-os_cloudstandalone-openstack-baremetal-create-rootironic_nodesyaml-export-ironic_python_agent_ramdisk_idopenstack-image-show-deploy-ramdisk-c-id-f-value-export-ironic_python_agent_kernel_idopenstack-image-show-deploy-kernel-c-id-f-value-for-node-in-openstack-baremetal-node-list-c-uuid-f-value-do-openstack-baremetal-node-set-node-driver-info-deploy_ramdiskironic_python_agent_ramdisk_id-driver-info-deploy_kernelironic_python_agent_kernel_id-resource-class-baremetal-property-capabilitiesboot_modeuefi-done-create-a-baremetal-flavor-openstack-flavor-create-baremetal-ram-1024-vcpus-1-disk-15-property-resourcesvcpu0-property-resourcesmemory_mb0-property-resourcesdisk_gb0-property-resourcescustom_baremetal1-property-capabilitiesboot_modeuefi-create-image-imgfedora-cloud-base-38-16x86_64qcow2-urlhttpsdownloadfedoraprojectorgpubfedoralinuxreleases38cloudx86_64imagesimg-curl-o-tmpimg-l-url-disk_formatqemu-img-info-tmpimg-grep-file-format-awk-print-nf-openstack-image-create-container-format-bare-disk-format-disk_format-fedora-cloud-base-38-tmpimg-export-baremetal_nodesopenstack-baremetal-node-list-c-uuid-f-value-manage-nodes-for-node-in-baremetal_nodes-do-openstack-baremetal-node-manage-node-done-wait-for-nodes-to-reach-manageable-state-watch-openstack-baremetal-node-list-inspect-baremetal-nodes-for-node-in-baremetal_nodes-do-openstack-baremetal-introspection-start-node-done-wait-for-inspection-to-complete-watch-openstack-baremetal-introspection-list-provide-nodes-for-node-in-baremetal_nodes-do-openstack-baremetal-node-provide-node-done-wait-for-nodes-to-reach-available-state-watch-openstack-baremetal-node-list-create-an-instance-on-baremetal-openstack-server-show-baremetal-test-openstack-server-create-baremetal-test-flavor-baremetal-image-fedora-cloud-base-38-nic-net-idprovisioning-wait-check-instance-status-and-network-connectivity-openstack-server-show-baremetal-test-ping-c-4-openstack-server-show-baremetal-test-f-json-c-addresses-jq-r-addressesprovisioning0" title="Permanent link">#</a></h2>
 <div class="highlight"><pre><span></span><code>export OS_CLOUD=standalone
 source ~/install_yamls/devsetup/scripts/edpm-deploy-instance.sh
 </code></pre></div>
@@ -1420,7 +1658,7 @@ The same pattern can be applied to other services.</p>
   <small>
     
       Last update:
-      2023-10-10
+      2023-10-12
     
   </small>
 </div>
