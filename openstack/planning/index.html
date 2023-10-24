@@ -336,6 +336,26 @@
   
   
     <li class="md-nav__item">
+      <a href="../../oepsntack/pull_openstack_configuration.md" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    None
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../stop_openstack_services/" class="md-nav__link">
         
   
@@ -817,6 +837,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#configuration-tooling" class="md-nav__link">
+    Configuration tooling
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#node-roles" class="md-nav__link">
     Node Roles
   </a>
@@ -941,6 +968,45 @@ configuration between <code>Secret</code> and <code>customServiceConfig</code> w
 section header (eg: <code>[DEFAULT]</code>) to be present in both places.</p>
 <p>Attention should be paid to each service's adoption process as they may have
 some particularities regarding their configuration.</p>
+<h2 id="configuration-tooling">Configuration tooling<a class="headerlink" href="#configuration-tooling" title="Permanent link">#</a></h2>
+<p>In order to help users to handle the configuration for the TripleO and Openstack
+services the tool: https://github.com/openstack-k8s-operators/os-diff has been
+develop to compare the configuration files between the TripleO deployment and
+the next gen cloud.
+Make sure Golang is installed and configured on your env:</p>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/openstack-k8s-operators/os-diff
+<span class="nb">pushd</span><span class="w"> </span>os-diff
+make<span class="w"> </span>build
+</code></pre></div>
+<p>Then configure ansible.cfg and ssh-config file according to your environment:</p>
+<div class="highlight"><pre><span></span><code><span class="l l-Scalar l-Scalar-Plain">Host *</span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">IdentitiesOnly yes</span>
+
+<span class="l l-Scalar l-Scalar-Plain">Host virthost</span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">Hostname virthost</span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">IdentityFile ~/.ssh/id_rsa</span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">User root</span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">StrictHostKeyChecking no</span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">UserKnownHostsFile=/dev/null</span>
+
+
+<span class="l l-Scalar l-Scalar-Plain">Host standalone</span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">Hostname standalone</span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">IdentityFile ~/install_yamls/out/edpm/ansibleee-ssh-key-id_rsa</span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">User root</span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">StrictHostKeyChecking no</span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">UserKnownHostsFile=/dev/null</span>
+
+<span class="l l-Scalar l-Scalar-Plain">Host crc</span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">Hostname crc</span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">IdentityFile ~/.ssh/id_rsa</span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">User stack</span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">StrictHostKeyChecking no</span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">UserKnownHostsFile=/dev/null</span>
+</code></pre></div>
+<p>And test your connection:</p>
+<div class="highlight"><pre><span></span><code>ssh<span class="w"> </span>-F<span class="w"> </span>ssh.config<span class="w"> </span>standalone
+</code></pre></div>
 <h2 id="node-roles">Node Roles<a class="headerlink" href="#node-roles" title="Permanent link">#</a></h2>
 <p>In Director deployments we had 4 different standard roles for the nodes:
 <code>Controller</code>, <code>Compute</code>, <code>Ceph Storage</code>, <code>Swift Storage</code>, but in podified
@@ -1025,7 +1091,7 @@ better.</p>
   <small>
     
       Last update:
-      2023-06-23
+      2023-10-17
     
   </small>
 </div>

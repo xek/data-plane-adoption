@@ -342,6 +342,26 @@
   
   
     <li class="md-nav__item">
+      <a href="../../oepsntack/pull_openstack_configuration.md" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    None
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../stop_openstack_services/" class="md-nav__link">
         
   
@@ -1055,44 +1075,65 @@ the <code>openstack</code> namespace and that the <code>extraMounts</code> prope
 <code>OpenStackControlPlane</code> CR has been configured properly. These tasks
 are described in an earlier Adoption step <a href="../ceph_backend_configuration/">Ceph storage backend
 configuration</a>.</p>
+<div class="highlight"><pre><span></span><code>cat<span class="w"> </span><span class="s">&lt;&lt; EOF &gt; glance_patch.yaml</span>
+<span class="s">spec:</span>
+<span class="s">  glance:</span>
+<span class="s">    enabled: true</span>
+<span class="s">    template:</span>
+<span class="s">      databaseInstance: openstack</span>
+<span class="s">      customServiceConfig: |</span>
+<span class="s">        [DEFAULT]</span>
+<span class="s">        enabled_backends=default_backend:rbd</span>
+<span class="s">        [glance_store]</span>
+<span class="s">        default_backend=default_backend</span>
+<span class="s">        [default_backend]</span>
+<span class="s">        rbd_store_ceph_conf=/etc/ceph/ceph.conf</span>
+<span class="s">        rbd_store_user=openstack</span>
+<span class="s">        rbd_store_pool=images</span>
+<span class="s">        store_description=Ceph glance store backend.</span>
+<span class="s">      storageClass: &quot;local-storage&quot;</span>
+<span class="s">      storageRequest: 10G</span>
+<span class="s">      glanceAPIInternal:</span>
+<span class="s">        override:</span>
+<span class="s">          service:</span>
+<span class="s">            metadata:</span>
+<span class="s">              annotations:</span>
+<span class="s">                metallb.universe.tf/address-pool: internalapi</span>
+<span class="s">                metallb.universe.tf/allow-shared-ip: internalapi</span>
+<span class="s">                metallb.universe.tf/loadBalancerIPs: 172.17.0.80</span>
+<span class="s">            spec:</span>
+<span class="s">              type: LoadBalancer</span>
+<span class="s">        networkAttachments:</span>
+<span class="s">        - storage</span>
+<span class="s">      glanceAPIExternal:</span>
+<span class="s">        networkAttachments:</span>
+<span class="s">        - storage</span>
+<span class="s">EOF</span>
+</code></pre></div>
+<blockquote>
+<p>If you have previously backup your Openstack services configuration file from the old environment:
+<a href="../pull_openstack_configuration/">pull openstack configuration os-diff</a> you can use os-diff to compare
+and make sure the configuration is correct.</p>
+</blockquote>
+<div class="highlight"><pre><span></span><code><span class="nb">pushd</span><span class="w"> </span>os-diff
+./os-diff<span class="w"> </span>cdiff<span class="w"> </span>--service<span class="w"> </span>glance<span class="w"> </span>-c<span class="w"> </span>/tmp/collect_tripleo_configs/glance/etc/glance/glance-api.conf<span class="w"> </span>-o<span class="w"> </span>glance_patch.yaml
+</code></pre></div>
+<blockquote>
+<p>This will producre the difference between both ini configuration files.</p>
+</blockquote>
 <p>Patch OpenStackControlPlane to deploy Glance with Ceph backend:</p>
-<div class="highlight"><pre><span></span><code>oc patch openstackcontrolplane openstack --type=merge --patch &#39;
-spec:
-  glance:
-    enabled: true
-    template:
-      databaseInstance: openstack
-      customServiceConfig: |
-        [DEFAULT]
-        enabled_backends=default_backend:rbd
-        [glance_store]
-        default_backend=default_backend
-        [default_backend]
-        rbd_store_ceph_conf=/etc/ceph/ceph.conf
-        rbd_store_user=openstack
-        rbd_store_pool=images
-        store_description=Ceph glance store backend.
-      storageClass: &quot;local-storage&quot;
-      storageRequest: 10G
-      glanceAPIInternal:
-        override:
-          service:
-            metadata:
-              annotations:
-                metallb.universe.tf/address-pool: internalapi
-                metallb.universe.tf/allow-shared-ip: internalapi
-                metallb.universe.tf/loadBalancerIPs: 172.17.0.80
-            spec:
-              type: LoadBalancer
-        networkAttachments:
-        - storage
-      glanceAPIExternal:
-        networkAttachments:
-        - storage
-&#39;
+<div class="highlight"><pre><span></span><code>oc patch openstackcontrolplane openstack --type=merge --patch-file glance_patch.yaml
 </code></pre></div>
 <h2 id="post-checks">Post-checks<a class="headerlink" href="#post-checks" title="Permanent link">#</a></h2>
 <h3 id="test-the-glance-service-from-the-openstack-cli">Test the glance service from the OpenStack CLI<a class="headerlink" href="#test-the-glance-service-from-the-openstack-cli" title="Permanent link">#</a></h3>
+<blockquote>
+<p>You can compare and make sure the configuration has been correctly applied to the glance pods by running</p>
+</blockquote>
+<div class="highlight"><pre><span></span><code>./os-diff<span class="w"> </span>cdiff<span class="w"> </span>--service<span class="w"> </span>glance<span class="w"> </span>-c<span class="w"> </span>/etc/glance/glance.conf.d/02-config.conf<span class="w">  </span>-o<span class="w"> </span>glance_patch.yaml<span class="w"> </span>--frompod<span class="w"> </span>-p<span class="w"> </span>glance-api
+</code></pre></div>
+<blockquote>
+<p>If no line appear, then the configuration is correctly done.</p>
+</blockquote>
 <p>Inspect the resulting glance pods:</p>
 <div class="highlight"><pre><span></span><code><span class="nv">GLANCE_POD</span><span class="o">=</span><span class="sb">`</span>oc<span class="w"> </span>get<span class="w"> </span>pod<span class="w"> </span><span class="p">|</span>grep<span class="w"> </span>glance-external-api<span class="w"> </span><span class="p">|</span><span class="w"> </span>cut<span class="w"> </span>-f<span class="w"> </span><span class="m">1</span><span class="w"> </span>-d<span class="s1">&#39; &#39;</span><span class="sb">`</span>
 oc<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-t<span class="w"> </span><span class="nv">$GLANCE_POD</span><span class="w"> </span>-c<span class="w"> </span>glance-api<span class="w"> </span>--<span class="w"> </span>cat<span class="w"> </span>/etc/glance/glance.conf.d/02-config.conf
@@ -1201,7 +1242,7 @@ c3158cad-d50b-452f-bec1-f250562f5c1f
   <small>
     
       Last update:
-      2023-10-04
+      2023-10-19
     
   </small>
 </div>
