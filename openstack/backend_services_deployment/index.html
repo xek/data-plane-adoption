@@ -697,6 +697,26 @@
   
   
     <li class="md-nav__item">
+      <a href="../heat_adoption/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Heat adoption
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../troubleshooting/" class="md-nav__link">
         
   
@@ -1035,6 +1055,8 @@ NEUTRON_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep &#39; NeutronP
 NOVA_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep &#39; NovaPassword:&#39; | awk -F &#39;: &#39; &#39;{ print $2; }&#39;)
 OCTAVIA_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep &#39; OctaviaPassword:&#39; | awk -F &#39;: &#39; &#39;{ print $2; }&#39;)
 PLACEMENT_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep &#39; PlacementPassword:&#39; | awk -F &#39;: &#39; &#39;{ print $2; }&#39;)
+HEAT_AUTH_ENCRYPTION_KEY=$(cat ~/tripleo-standalone-passwords.yaml | grep &#39; HeatAuthEncryptionKey:&#39; | awk -F &#39;: &#39; &#39;{ print $2; }&#39;)
+HEAT_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep &#39; HeatPassword:&#39; | awk -F &#39;: &#39; &#39;{ print $2; }&#39;)
 </code></pre></div>
 <h2 id="pre-checks">Pre-checks<a class="headerlink" href="#pre-checks" title="Permanent link">#</a></h2>
 <h2 id="procedure-backend-services-deployment">Procedure - backend services deployment<a class="headerlink" href="#procedure-backend-services-deployment" title="Permanent link">#</a></h2>
@@ -1070,6 +1092,8 @@ oc set data secret/osp-secret &quot;NeutronPassword=$NEUTRON_PASSWORD&quot;
 oc set data secret/osp-secret &quot;NovaPassword=$NOVA_PASSWORD&quot;
 oc set data secret/osp-secret &quot;OctaviaPassword=$OCTAVIA_PASSWORD&quot;
 oc set data secret/osp-secret &quot;PlacementPassword=$PLACEMENT_PASSWORD&quot;
+oc set data secret/osp-secret &quot;HeatPassword=$HEAT_PASSWORD&quot;
+oc set data secret/osp-secret &quot;HeatAuthEncryptionKey=$HEAT_AUTH_ENCRYPTION_KEY&quot;
 </code></pre></div>
 <ul>
 <li>Deploy OpenStackControlPlane. <strong>Make sure to only enable DNS,
@@ -1208,7 +1232,7 @@ oc set data secret/osp-secret &quot;PlacementPassword=$PLACEMENT_PASSWORD&quot;
   <small>
     
       Last update:
-      2023-10-02
+      2023-10-12
     
   </small>
 </div>

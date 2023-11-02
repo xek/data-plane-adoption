@@ -12,13 +12,13 @@
         <meta name="author" content="OpenStack Team">
       
       
-        <link rel="canonical" href="https://openstack-k8s-operators.github.io/data-plane-adoption/openstack/keystone_adoption/">
+        <link rel="canonical" href="https://openstack-k8s-operators.github.io/data-plane-adoption/openstack/heat_adoption/">
       
       
-        <link rel="prev" href="../ovn_adoption/">
+        <link rel="prev" href="../ironic_adoption/">
       
       
-        <link rel="next" href="../neutron_adoption/">
+        <link rel="next" href="../troubleshooting/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
@@ -26,7 +26,7 @@
     
     
       
-        <title>Keystone adoption - OpenStack Data Plane Adoption</title>
+        <title>Heat adoption - OpenStack Data Plane Adoption</title>
       
     
     
@@ -81,7 +81,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#prerequisites" class="md-skip">
+        <a href="#heat-adoption" class="md-skip">
           Skip to content
         </a>
       
@@ -120,7 +120,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Keystone adoption
+              Heat adoption
             
           </span>
         </div>
@@ -440,27 +440,9 @@
                 
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Keystone adoption
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../keystone_adoption/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -469,59 +451,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#prerequisites" class="md-nav__link">
-    Prerequisites
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#variables" class="md-nav__link">
-    Variables
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#pre-checks" class="md-nav__link">
-    Pre-checks
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#procedure-keystone-adoption" class="md-nav__link">
-    Procedure - Keystone adoption
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#post-checks" class="md-nav__link">
-    Post-checks
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -691,9 +620,29 @@
                 
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../heat_adoption/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Heat adoption
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -702,6 +651,74 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    Prerequisites
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#procedure-heat-adoption" class="md-nav__link">
+    Procedure - Heat adoption
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#post-checks" class="md-nav__link">
+    Post-checks
+  </a>
+  
+    <nav class="md-nav" aria-label="Post-checks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#check-that-heat-service-is-registered-in-keystone" class="md-nav__link">
+    Check that Heat service is registered in Keystone
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#check-heat-engine-services-are-up" class="md-nav__link">
+    Check Heat engine services are up
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-you-can-now-see-your-heat-stacks-again" class="md-nav__link">
+    Verify you can now see your Heat stacks again
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -937,6 +954,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -952,22 +971,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#variables" class="md-nav__link">
-    Variables
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#pre-checks" class="md-nav__link">
-    Pre-checks
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#procedure-keystone-adoption" class="md-nav__link">
-    Procedure - Keystone adoption
+  <a href="#procedure-heat-adoption" class="md-nav__link">
+    Procedure - Heat adoption
   </a>
   
 </li>
@@ -976,6 +981,33 @@
   <a href="#post-checks" class="md-nav__link">
     Post-checks
   </a>
+  
+    <nav class="md-nav" aria-label="Post-checks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#check-that-heat-service-is-registered-in-keystone" class="md-nav__link">
+    Check that Heat service is registered in Keystone
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#check-heat-engine-services-are-up" class="md-nav__link">
+    Check Heat engine services are up
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-you-can-now-see-your-heat-stacks-again" class="md-nav__link">
+    Verify you can now see your Heat stacks again
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -997,62 +1029,152 @@
   
 
 
-  <h1>Keystone adoption</h1>
-
+<h1 id="heat-adoption">Heat adoption<a class="headerlink" href="#heat-adoption" title="Permanent link">#</a></h1>
+<p>Adopting Heat means that an existing <code>OpenStackControlPlane</code> CR, where Heat
+is supposed to be disabled, should be patched to start the service with the
+configuration parameters provided by the source environment.</p>
+<p>After the adoption process has been completed, a user can expect that they
+will then have CR's for <code>Heat</code>, <code>HeatAPI</code>, <code>HeatEngine</code> and <code>HeatCFNAPI</code>.
+Additionally, a user should have endpoints created within Keystone to facilitate
+the above mentioned servies.</p>
+<p>This guide also assumes that:</p>
+<ol>
+<li>A <code>TripleO</code> environment (the source Cloud) is running on one side;</li>
+<li>A OpenShift environment is running on the other side.</li>
+</ol>
 <h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h2>
 <ul>
-<li>Previous Adoption steps completed. Notably, the service databases
-  must already be imported into the podified MariaDB.</li>
+<li>Previous Adoption steps completed. Notably, MariaDB and Keystone
+  should be already adopted.</li>
+<li>In addition, if your existing Heat stacks contain resources from other services
+  such as Neutron, Nova, Swift, etc. Those services should be adopted first before
+  trying to adopt Heat.</li>
 </ul>
-<h2 id="variables">Variables<a class="headerlink" href="#variables" title="Permanent link">#</a></h2>
-<p>(There are no shell variables necessary currently.)</p>
-<h2 id="pre-checks">Pre-checks<a class="headerlink" href="#pre-checks" title="Permanent link">#</a></h2>
-<h2 id="procedure-keystone-adoption">Procedure - Keystone adoption<a class="headerlink" href="#procedure-keystone-adoption" title="Permanent link">#</a></h2>
-<ul>
-<li>Patch OpenStackControlPlane to deploy Keystone:</li>
-</ul>
-<div class="highlight"><pre><span></span><code>oc patch openstackcontrolplane openstack --type=merge --patch &#39;
-spec:
-  keystone:
-    enabled: true
-    apiOverride:
-      route: {}
-    template:
-      override:
-        service:
-          internal:
-            metadata:
-              annotations:
-                metallb.universe.tf/address-pool: internalapi
-                metallb.universe.tf/allow-shared-ip: internalapi
-                metallb.universe.tf/loadBalancerIPs: 172.17.0.80
-            spec:
-              type: LoadBalancer
-      databaseInstance: openstack
-      secret: osp-secret
-&#39;
-</code></pre></div>
-<ul>
-<li>Create alias to use <code>openstack</code> command in the adopted deployment:</li>
-</ul>
-<div class="highlight"><pre><span></span><code><span class="nb">alias</span><span class="w"> </span><span class="nv">openstack</span><span class="o">=</span><span class="s2">&quot;oc exec -t openstackclient -- openstack&quot;</span>
-</code></pre></div>
-<ul>
-<li>Clean up old services and endpoints that still point to the old
-  control plane (everything except Keystone service and endpoints):</li>
-</ul>
-<div class="highlight"><pre><span></span><code>openstack<span class="w"> </span>endpoint<span class="w"> </span>list<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>keystone<span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span><span class="s1">&#39;/admin/{ print $2; }&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>xargs<span class="w"> </span><span class="si">${</span><span class="nv">BASH_ALIASES</span><span class="p">[openstack]</span><span class="si">}</span><span class="w"> </span>endpoint<span class="w"> </span>delete<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">true</span>
+<h2 id="procedure-heat-adoption">Procedure - Heat adoption<a class="headerlink" href="#procedure-heat-adoption" title="Permanent link">#</a></h2>
+<p>As already done for <a href="https://github.com/openstack-k8s-operators/data-plane-adoption/blob/main/keystone_adoption.md">Keystone</a>, the Heat Adoption follows a similar pattern.</p>
+<p>Patch the <code>osp-secret</code> to update the <code>HeatAuthEncryptionKey</code> and <code>HeatPassword</code>. This needs
+to match what you have configured in the existing TripleO Heat configuration.</p>
+<p>You can retrieve and verify the existing <code>auth_encryption_key</code> and <code>service</code> passwords via:
+<div class="highlight"><pre><span></span><code><span class="o">[</span>stack@rhosp17<span class="w"> </span>~<span class="o">]</span>$<span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s1">&#39;HeatPassword|HeatAuth&#39;</span><span class="w"> </span>~/overcloud-deploy/overcloud/overcloud-passwords.yaml
+<span class="w">  </span>HeatAuthEncryptionKey:<span class="w"> </span>Q60Hj8PqbrDNu2dDCbyIQE2dibpQUPg2
+<span class="w">  </span>HeatPassword:<span class="w"> </span>dU2N0Vr2bdelYH7eQonAwPfI3
+</code></pre></div></p>
+<p>And verifying on one of the Controllers that this is indeed the value in use:
+<div class="highlight"><pre><span></span><code><span class="o">[</span>stack@rhosp17<span class="w"> </span>~<span class="o">]</span>$<span class="w"> </span>ansible<span class="w"> </span>-i<span class="w"> </span>overcloud-deploy/overcloud/config-download/overcloud/tripleo-ansible-inventory.yaml<span class="w"> </span>overcloud-controller-0<span class="w"> </span>-m<span class="w"> </span>shell<span class="w"> </span>-a<span class="w"> </span><span class="s2">&quot;grep auth_encryption_key /var/lib/config-data/puppet-generated/heat/etc/heat/heat.conf | grep -Ev &#39;^#|^</span>$<span class="s2">&#39;&quot;</span><span class="w"> </span>-b
+overcloud-controller-0<span class="w"> </span><span class="p">|</span><span class="w"> </span>CHANGED<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="nv">rc</span><span class="o">=</span><span class="m">0</span><span class="w"> </span>&gt;&gt;
+<span class="nv">auth_encryption_key</span><span class="o">=</span>Q60Hj8PqbrDNu2dDCbyIQE2dibpQUPg2
+</code></pre></div></p>
+<p>This password needs to be base64 encoded and added to the <code>osp-secret</code>
+<div class="highlight"><pre><span></span><code>❯<span class="w"> </span><span class="nb">echo</span><span class="w"> </span>Q60Hj8PqbrDNu2dDCbyIQE2dibpQUPg2<span class="w"> </span><span class="p">|</span><span class="w"> </span>base64
+UTYwSGo4UHFickROdTJkRENieUlRRTJkaWJwUVVQZzIK
 
-<span class="k">for</span><span class="w"> </span>service<span class="w"> </span><span class="k">in</span><span class="w"> </span>cinderv3<span class="w"> </span>glance<span class="w"> </span>neutron<span class="w"> </span>nova<span class="w"> </span>placement<span class="w"> </span>swift<span class="p">;</span><span class="w"> </span><span class="k">do</span>
-<span class="w">  </span>openstack<span class="w"> </span>service<span class="w"> </span>list<span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span><span class="s2">&quot;/ </span><span class="nv">$service</span><span class="s2"> /{ print \$2; }&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>xargs<span class="w"> </span><span class="si">${</span><span class="nv">BASH_ALIASES</span><span class="p">[openstack]</span><span class="si">}</span><span class="w"> </span>service<span class="w"> </span>delete<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">true</span>
-<span class="k">done</span>
+❯<span class="w"> </span>oc<span class="w"> </span>patch<span class="w"> </span>secret<span class="w"> </span>osp-secret<span class="w"> </span>--type<span class="o">=</span><span class="s1">&#39;json&#39;</span><span class="w"> </span>-p<span class="o">=</span><span class="s1">&#39;[{&quot;op&quot; : &quot;replace&quot; ,&quot;path&quot; : &quot;/data/HeatAuthEncryptionKey&quot; ,&quot;value&quot; : &quot;UTYwSGo4UHFickROdTJkRENieUlRRTJkaWJwUVVQZzIK&quot;}]&#39;</span>
+secret/osp-secret<span class="w"> </span>patched
+</code></pre></div></p>
+<p>Patch OpenStackControlPlane to deploy Heat:</p>
+<div class="highlight"><pre><span></span><code>oc<span class="w"> </span>patch<span class="w"> </span>openstackcontrolplane<span class="w"> </span>openstack<span class="w"> </span>--type<span class="o">=</span>merge<span class="w"> </span>--patch<span class="w"> </span><span class="s1">&#39;</span>
+<span class="s1">spec:</span>
+<span class="s1">  heat:</span>
+<span class="s1">    enabled: true</span>
+<span class="s1">    apiOverride:</span>
+<span class="s1">      route: {}</span>
+<span class="s1">    template:</span>
+<span class="s1">      databaseInstance: openstack</span>
+<span class="s1">      secret: osp-secret</span>
+<span class="s1">      memcachedInstance: memcached</span>
+<span class="s1">      passwordSelectors:</span>
+<span class="s1">        authEncryptionKey: HeatAuthEncryptionKey</span>
+<span class="s1">        database: HeatDatabasePassword</span>
+<span class="s1">        service: HeatPassword</span>
+<span class="s1">&#39;</span>
 </code></pre></div>
 <h2 id="post-checks">Post-checks<a class="headerlink" href="#post-checks" title="Permanent link">#</a></h2>
-<ul>
-<li>See that Keystone endpoints are defined and pointing to the podified
-  FQDNs:</li>
-</ul>
-<div class="highlight"><pre><span></span><code>openstack<span class="w"> </span>endpoint<span class="w"> </span>list<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>keystone
+<p>Ensure all of the CR's reach the "Setup Complete" state:
+<div class="highlight"><pre><span></span><code>❯<span class="w"> </span>oc<span class="w"> </span>get<span class="w"> </span>Heat,HeatAPI,HeatEngine,HeatCFNAPI
+NAME<span class="w">                           </span>STATUS<span class="w">   </span>MESSAGE
+heat.heat.openstack.org/heat<span class="w">   </span>True<span class="w">     </span>Setup<span class="w"> </span><span class="nb">complete</span>
+
+NAME<span class="w">                                  </span>STATUS<span class="w">   </span>MESSAGE
+heatapi.heat.openstack.org/heat-api<span class="w">   </span>True<span class="w">     </span>Setup<span class="w"> </span><span class="nb">complete</span>
+
+NAME<span class="w">                                        </span>STATUS<span class="w">   </span>MESSAGE
+heatengine.heat.openstack.org/heat-engine<span class="w">   </span>True<span class="w">     </span>Setup<span class="w"> </span><span class="nb">complete</span>
+
+NAME<span class="w">                                        </span>STATUS<span class="w">   </span>MESSAGE
+heatcfnapi.heat.openstack.org/heat-cfnapi<span class="w">   </span>True<span class="w">     </span>Setup<span class="w"> </span><span class="nb">complete</span>
+</code></pre></div></p>
+<h3 id="check-that-heat-service-is-registered-in-keystone">Check that Heat service is registered in Keystone<a class="headerlink" href="#check-that-heat-service-is-registered-in-keystone" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code><span class="w"> </span>oc<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>openstackclient<span class="w"> </span>--<span class="w"> </span>openstack<span class="w"> </span>service<span class="w"> </span>list<span class="w"> </span>-c<span class="w"> </span>Name<span class="w"> </span>-c<span class="w"> </span>Type
++------------+----------------+
+<span class="p">|</span><span class="w"> </span>Name<span class="w">       </span><span class="p">|</span><span class="w"> </span>Type<span class="w">           </span><span class="p">|</span>
++------------+----------------+
+<span class="p">|</span><span class="w"> </span>heat<span class="w">       </span><span class="p">|</span><span class="w"> </span>orchestration<span class="w">  </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>glance<span class="w">     </span><span class="p">|</span><span class="w"> </span>image<span class="w">          </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>heat-cfn<span class="w">   </span><span class="p">|</span><span class="w"> </span>cloudformation<span class="w"> </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>ceilometer<span class="w"> </span><span class="p">|</span><span class="w"> </span>Ceilometer<span class="w">     </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>keystone<span class="w">   </span><span class="p">|</span><span class="w"> </span>identity<span class="w">       </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>placement<span class="w">  </span><span class="p">|</span><span class="w"> </span>placement<span class="w">      </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>cinderv3<span class="w">   </span><span class="p">|</span><span class="w"> </span>volumev3<span class="w">       </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>nova<span class="w">       </span><span class="p">|</span><span class="w"> </span>compute<span class="w">        </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>neutron<span class="w">    </span><span class="p">|</span><span class="w"> </span>network<span class="w">        </span><span class="p">|</span>
++------------+----------------+
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>❯<span class="w"> </span>oc<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>openstackclient<span class="w"> </span>--<span class="w"> </span>openstack<span class="w"> </span>endpoint<span class="w"> </span>list<span class="w"> </span>--service<span class="o">=</span>heat<span class="w"> </span>-f<span class="w"> </span>yaml
+-<span class="w"> </span>Enabled:<span class="w"> </span><span class="nb">true</span>
+<span class="w">  </span>ID:<span class="w"> </span>1da7df5b25b94d1cae85e3ad736b25a5
+<span class="w">  </span>Interface:<span class="w"> </span>public
+<span class="w">  </span>Region:<span class="w"> </span>regionOne
+<span class="w">  </span>Service<span class="w"> </span>Name:<span class="w"> </span>heat
+<span class="w">  </span>Service<span class="w"> </span>Type:<span class="w"> </span>orchestration
+<span class="w">  </span>URL:<span class="w"> </span>http://heat-api-public-openstack-operators.apps.okd.bne-shift.net/v1/%<span class="o">(</span>tenant_id<span class="o">)</span>s
+-<span class="w"> </span>Enabled:<span class="w"> </span><span class="nb">true</span>
+<span class="w">  </span>ID:<span class="w"> </span>414dd03d8e9d462988113ea0e3a330b0
+<span class="w">  </span>Interface:<span class="w"> </span>internal
+<span class="w">  </span>Region:<span class="w"> </span>regionOne
+<span class="w">  </span>Service<span class="w"> </span>Name:<span class="w"> </span>heat
+<span class="w">  </span>Service<span class="w"> </span>Type:<span class="w"> </span>orchestration
+<span class="w">  </span>URL:<span class="w"> </span>http://heat-api-internal.openstack-operators.svc:8004/v1/%<span class="o">(</span>tenant_id<span class="o">)</span>s
+</code></pre></div>
+<h3 id="check-heat-engine-services-are-up">Check Heat engine services are up<a class="headerlink" href="#check-heat-engine-services-are-up" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code><span class="w"> </span>oc<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>openstackclient<span class="w"> </span>--<span class="w"> </span>openstack<span class="w"> </span>orchestration<span class="w"> </span>service<span class="w"> </span>list<span class="w"> </span>-f<span class="w"> </span>yaml
+-<span class="w"> </span>Binary:<span class="w"> </span>heat-engine
+<span class="w">  </span>Engine<span class="w"> </span>ID:<span class="w"> </span>b16ad899-815a-4b0c-9f2e-e6d9c74aa200
+<span class="w">  </span>Host:<span class="w"> </span>heat-engine-6d47856868-p7pzz
+<span class="w">  </span>Hostname:<span class="w"> </span>heat-engine-6d47856868-p7pzz
+<span class="w">  </span>Status:<span class="w"> </span>up
+<span class="w">  </span>Topic:<span class="w"> </span>engine
+<span class="w">  </span>Updated<span class="w"> </span>At:<span class="w"> </span><span class="s1">&#39;2023-10-11T21:48:01.000000&#39;</span>
+-<span class="w"> </span>Binary:<span class="w"> </span>heat-engine
+<span class="w">  </span>Engine<span class="w"> </span>ID:<span class="w"> </span>887ed392-0799-4310-b95c-ac2d3e6f965f
+<span class="w">  </span>Host:<span class="w"> </span>heat-engine-6d47856868-p7pzz
+<span class="w">  </span>Hostname:<span class="w"> </span>heat-engine-6d47856868-p7pzz
+<span class="w">  </span>Status:<span class="w"> </span>up
+<span class="w">  </span>Topic:<span class="w"> </span>engine
+<span class="w">  </span>Updated<span class="w"> </span>At:<span class="w"> </span><span class="s1">&#39;2023-10-11T21:48:00.000000&#39;</span>
+-<span class="w"> </span>Binary:<span class="w"> </span>heat-engine
+<span class="w">  </span>Engine<span class="w"> </span>ID:<span class="w"> </span>26ed9668-b3f2-48aa-92e8-2862252485ea
+<span class="w">  </span>Host:<span class="w"> </span>heat-engine-6d47856868-p7pzz
+<span class="w">  </span>Hostname:<span class="w"> </span>heat-engine-6d47856868-p7pzz
+<span class="w">  </span>Status:<span class="w"> </span>up
+<span class="w">  </span>Topic:<span class="w"> </span>engine
+<span class="w">  </span>Updated<span class="w"> </span>At:<span class="w"> </span><span class="s1">&#39;2023-10-11T21:48:00.000000&#39;</span>
+-<span class="w"> </span>Binary:<span class="w"> </span>heat-engine
+<span class="w">  </span>Engine<span class="w"> </span>ID:<span class="w"> </span>1011943b-9fea-4f53-b543-d841297245fd
+<span class="w">  </span>Host:<span class="w"> </span>heat-engine-6d47856868-p7pzz
+<span class="w">  </span>Hostname:<span class="w"> </span>heat-engine-6d47856868-p7pzz
+<span class="w">  </span>Status:<span class="w"> </span>up
+<span class="w">  </span>Topic:<span class="w"> </span>engine
+<span class="w">  </span>Updated<span class="w"> </span>At:<span class="w"> </span><span class="s1">&#39;2023-10-11T21:48:01.000000&#39;</span>
+</code></pre></div>
+<h3 id="verify-you-can-now-see-your-heat-stacks-again">Verify you can now see your Heat stacks again<a class="headerlink" href="#verify-you-can-now-see-your-heat-stacks-again" title="Permanent link">#</a></h3>
+<p>We can now test that user can create networks, subnets, ports, routers etc.</p>
+<div class="highlight"><pre><span></span><code>❯<span class="w"> </span>openstack<span class="w"> </span>stack<span class="w"> </span>list<span class="w"> </span>-f<span class="w"> </span>yaml
+-<span class="w"> </span>Creation<span class="w"> </span>Time:<span class="w"> </span><span class="s1">&#39;2023-10-11T22:03:20Z&#39;</span>
+<span class="w">  </span>ID:<span class="w"> </span>20f95925-7443-49cb-9561-a1ab736749ba
+<span class="w">  </span>Project:<span class="w"> </span>4eacd0d1cab04427bc315805c28e66c9
+<span class="w">  </span>Stack<span class="w"> </span>Name:<span class="w"> </span>test-networks
+<span class="w">  </span>Stack<span class="w"> </span>Status:<span class="w"> </span>CREATE_COMPLETE
+<span class="w">  </span>Updated<span class="w"> </span>Time:<span class="w"> </span>null
 </code></pre></div>
 
   <hr>
@@ -1060,7 +1182,7 @@ spec:
   <small>
     
       Last update:
-      2023-10-02
+      2023-10-12
     
   </small>
 </div>

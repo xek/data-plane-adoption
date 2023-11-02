@@ -56,6 +56,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://openstack-k8s-operators.github.io/data-plane-adoption/openstack/heat_adoption/</loc>
+         <lastmod>2023-11-02</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://openstack-k8s-operators.github.io/data-plane-adoption/openstack/horizon_adoption/</loc>
          <lastmod>2023-11-02</lastmod>
          <changefreq>daily</changefreq>
