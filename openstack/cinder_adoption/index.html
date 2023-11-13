@@ -840,6 +840,26 @@
 
               
             
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../node-selector/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Node Selector
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1327,7 +1347,7 @@ cinder backup services that are not only network intensive but also memory and
 CPU intensive.  This may be a concern for the OpenShift human operators, and
 they may want to use the <code>nodeSelector</code> to prevent these service from
 interfering with their other OpenShift workloads</p>
-<p>Please make sure to read the <a href="node-selector">Nodes Selector guide</a> before
+<p>Please make sure to read the <a href="../node-selector/">Nodes Selector guide</a> before
 continuing, as we'll be referring to some of the concepts explained there in the
 following sections.</p>
 <p>When selecting the nodes where cinder volume is going to run please remember
@@ -1392,7 +1412,7 @@ to apply a <code>MachineConfig</code> similar to this one:</p>
 </code></pre></div>
 <p>Remember that if we are using labels to restrict the nodes where cinder
 services are running we'll need to use a <code>MachineConfigPool</code> as described in
-the <a href="node-labels">nodes selector guide</a> to limit the effects of the
+the <a href="../node-selector/">nodes selector guide</a> to limit the effects of the
 <code>MachineConfig</code> to only the nodes were our services may run.</p>
 <p>If we are using a toy single node deployment to test the process we may need to
 replace <code>worker</code> with <code>master</code> in the <code>MachineConfig</code>.</p>
@@ -1404,7 +1424,8 @@ how to configure it.</p>
 <p>There's nothing to do for FC volumes to work, but the <em>cinder volume and cinder
 backup services need to run in an OpenShift host that has HBAs</em>, so if there
 are nodes that don't have HBAs then we'll need to use labels to restrict where
-these services can run, as mentioned in the <a href="#node-labels">node labels section</a>.</p>
+these services can run, as mentioned in the [node selection section]
+(#node-selection).</p>
 <p>This also means that for virtualized OpenShift clusters using FC we'll need to
 expose the host's HBAs inside the VM.</p>
 <p>For production deployments using FC volumes we always recommend setting up
@@ -1444,7 +1465,7 @@ spec:
 </code></pre></div>
 <p>Remember that if we are using labels to restrict the nodes where cinder
 services are running we'll need to use a <code>MachineConfigPool</code> as described in
-the <a href="node-labels">nodes selector guide</a> to limit the effects of the
+the <a href="../node-selector/">nodes selector guide</a> to limit the effects of the
 <code>MachineConfig</code> to only the nodes were our services may run.</p>
 <p>If we are using a toy single node deployment to test the process we may need to
 replace <code>worker</code> with <code>master</code> in the <code>MachineConfig</code>.</p>
@@ -1509,7 +1530,7 @@ that using <code>MachineConfig</code> like this one:</p>
 </code></pre></div>
 <p>Remember that if we are using labels to restrict the nodes where cinder
 services are running we'll need to use a <code>MachineConfigPool</code> as described in
-the <a href="node-labels">nodes selector guide</a> to limit the effects of the
+the <a href="../node-selector/">nodes selector guide</a> to limit the effects of the
 <code>MachineConfig</code> to only the nodes were our services may run.</p>
 <p>If we are using a toy single node deployment to test the process we may need to
 replace <code>worker</code> with <code>master</code> in the <code>MachineConfig</code>.</p>
@@ -1977,7 +1998,7 @@ the old volume because nova and cinder are still not connected.</p>
   <small>
     
       Last update:
-      2023-10-04
+      2023-11-10
     
   </small>
 </div>
