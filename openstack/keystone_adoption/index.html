@@ -653,6 +653,26 @@
   
   
     <li class="md-nav__item">
+      <a href="../manila_adoption/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Manila adoption
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../edpm_adoption/" class="md-nav__link">
         
   
@@ -1063,7 +1083,7 @@ spec:
 </ul>
 <div class="highlight"><pre><span></span><code>openstack<span class="w"> </span>endpoint<span class="w"> </span>list<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>keystone<span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span><span class="s1">&#39;/admin/{ print $2; }&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>xargs<span class="w"> </span><span class="si">${</span><span class="nv">BASH_ALIASES</span><span class="p">[openstack]</span><span class="si">}</span><span class="w"> </span>endpoint<span class="w"> </span>delete<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">true</span>
 
-<span class="k">for</span><span class="w"> </span>service<span class="w"> </span><span class="k">in</span><span class="w"> </span>cinderv3<span class="w"> </span>glance<span class="w"> </span>neutron<span class="w"> </span>nova<span class="w"> </span>placement<span class="w"> </span>swift<span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="k">for</span><span class="w"> </span>service<span class="w"> </span><span class="k">in</span><span class="w"> </span>cinderv3<span class="w"> </span>glance<span class="w"> </span>manila<span class="w"> </span>manilav2<span class="w"> </span>neutron<span class="w"> </span>nova<span class="w"> </span>placement<span class="w"> </span>swift<span class="p">;</span><span class="w"> </span><span class="k">do</span>
 <span class="w">  </span>openstack<span class="w"> </span>service<span class="w"> </span>list<span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span><span class="s2">&quot;/ </span><span class="nv">$service</span><span class="s2"> /{ print \$2; }&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>xargs<span class="w"> </span><span class="si">${</span><span class="nv">BASH_ALIASES</span><span class="p">[openstack]</span><span class="si">}</span><span class="w"> </span>service<span class="w"> </span>delete<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">true</span>
 <span class="k">done</span>
 </code></pre></div>
@@ -1080,7 +1100,7 @@ spec:
   <small>
     
       Last update:
-      2023-10-02
+      2023-11-03
     
   </small>
 </div>

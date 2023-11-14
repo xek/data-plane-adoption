@@ -643,6 +643,26 @@
   
   
     <li class="md-nav__item">
+      <a href="../manila_adoption/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Manila adoption
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../edpm_adoption/" class="md-nav__link">
         
   
@@ -1032,6 +1052,7 @@ etc.</p>
 <div class="highlight"><pre><span></span><code>openstack server list --all-projects -c ID -c Status |grep -E &#39;\| .+ing \|&#39;
 openstack volume list --all-projects -c ID -c Status |grep -E &#39;\| .+ing \|&#39;| grep -vi error
 openstack volume backup list --all-projects -c ID -c Status |grep -E &#39;\| .+ing \|&#39; | grep -vi error
+openstack share list --all-projects -c ID -c Status |grep -E &#39;\| .+ing \|&#39;| grep -vi error
 openstack image list -c ID -c Status |grep -E &#39;\| .+ing \|&#39;
 </code></pre></div>
 <h2 id="stopping-control-plane-services">Stopping control plane services<a class="headerlink" href="#stopping-control-plane-services" title="Permanent link">#</a></h2>
@@ -1054,12 +1075,16 @@ defined environmental variables and function:</p>
 <span class="w">                </span><span class="s2">&quot;tripleo_cinder_scheduler.service&quot;</span>
 <span class="w">                </span><span class="s2">&quot;tripleo_cinder_backup.service&quot;</span>
 <span class="w">                </span><span class="s2">&quot;tripleo_glance_api.service&quot;</span>
+<span class="w">                </span><span class="s2">&quot;tripleo_manila_api.service&quot;</span>
+<span class="w">                </span><span class="s2">&quot;tripleo_manila_api_cron.service&quot;</span>
+<span class="w">                </span><span class="s2">&quot;tripleo_manila_scheduler.service&quot;</span>
 <span class="w">                </span><span class="s2">&quot;tripleo_neutron_api.service&quot;</span>
 <span class="w">                </span><span class="s2">&quot;tripleo_nova_api.service&quot;</span>
 <span class="w">                </span><span class="s2">&quot;tripleo_placement_api.service&quot;</span><span class="o">)</span>
 
 <span class="nv">PacemakerResourcesToStop</span><span class="o">=(</span><span class="s2">&quot;openstack-cinder-volume&quot;</span>
-<span class="w">                          </span><span class="s2">&quot;openstack-cinder-backup&quot;</span><span class="o">)</span>
+<span class="w">                          </span><span class="s2">&quot;openstack-cinder-backup&quot;</span>
+<span class="w">                          </span><span class="s2">&quot;openstack-manila-share&quot;</span><span class="o">)</span>
 
 <span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Stopping systemd OpenStack services&quot;</span>
 <span class="k">for</span><span class="w"> </span>service<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="si">${</span><span class="nv">ServicesToStop</span><span class="p">[*]</span><span class="si">}</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
@@ -1107,7 +1132,7 @@ defined environmental variables and function:</p>
   <small>
     
       Last update:
-      2023-08-16
+      2023-11-03
     
   </small>
 </div>

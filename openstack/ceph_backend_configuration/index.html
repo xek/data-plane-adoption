@@ -542,8 +542,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#procedure-ceph-backend-configuration" class="md-nav__link">
-    Procedure - Ceph backend configuration
+  <a href="#modify-capabilities-of-the-openstack-user-to-accommodate-manila" class="md-nav__link">
+    Modify capabilities of the "openstack" user to accommodate Manila
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ceph-backend-configuration" class="md-nav__link">
+    Ceph backend configuration
   </a>
   
 </li>
@@ -635,6 +642,26 @@
   
   <span class="md-ellipsis">
     Horizon adoption
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../manila_adoption/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Manila adoption
   </span>
   
 
@@ -978,8 +1005,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#procedure-ceph-backend-configuration" class="md-nav__link">
-    Procedure - Ceph backend configuration
+  <a href="#modify-capabilities-of-the-openstack-user-to-accommodate-manila" class="md-nav__link">
+    Modify capabilities of the "openstack" user to accommodate Manila
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ceph-backend-configuration" class="md-nav__link">
+    Ceph backend configuration
   </a>
   
 </li>
@@ -1011,7 +1045,7 @@
 
 <h1 id="ceph-backend-configuration-if-applicable">Ceph backend configuration (if applicable)<a class="headerlink" href="#ceph-backend-configuration-if-applicable" title="Permanent link">#</a></h1>
 <p>If the original deployment uses a Ceph storage backend for any service
-(e.g. Glance, Cinder, Nova), the same backend must be used in the
+(e.g. Glance, Cinder, Nova, Manila), the same backend must be used in the
 adopted deployment and CRs must be configured accordingly.</p>
 <h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h2>
 <ul>
@@ -1024,7 +1058,22 @@ just illustrative, use values that are correct for your environment:</p>
 CEPH_KEY=$($CEPH_SSH &quot;cat /etc/ceph/ceph.client.openstack.keyring | base64 -w 0&quot;)
 CEPH_CONF=$($CEPH_SSH &quot;cat /etc/ceph/ceph.conf | base64 -w 0&quot;)
 </code></pre></div>
-<h2 id="procedure-ceph-backend-configuration">Procedure - Ceph backend configuration<a class="headerlink" href="#procedure-ceph-backend-configuration" title="Permanent link">#</a></h2>
+<h2 id="modify-capabilities-of-the-openstack-user-to-accommodate-manila">Modify capabilities of the "openstack" user to accommodate Manila<a class="headerlink" href="#modify-capabilities-of-the-openstack-user-to-accommodate-manila" title="Permanent link">#</a></h2>
+<p>On TripleO environments, the CephFS driver in Manila is configured to use 
+its own keypair. For convenience, let's modify the <code>openstack</code> user so that we 
+can use it across all OpenStack services.</p>
+<p>Using the same user across the services serves two purposes:
+- The capabilities of the user required to interact with the Manila service 
+  became far simpler and hence, more became more secure with RHOSP 18.
+- It is simpler to create a common ceph secret (keyring and ceph config 
+  file) and propagate the secret to all services that need it.</p>
+<div class="highlight"><pre><span></span><code>$CEPH_SSH cephadm shell
+ceph auth caps client.openstack \
+  mgr &#39;allow *&#39; \
+  mon &#39;allow r, profile rbd&#39; \
+  osd &#39;profile rbd pool=vms, profile rbd pool=volumes, profile rbd pool=images, allow rw pool manila_data&#39;
+</code></pre></div>
+<h2 id="ceph-backend-configuration">Ceph backend configuration<a class="headerlink" href="#ceph-backend-configuration" title="Permanent link">#</a></h2>
 <p>Create the <code>ceph-conf-files</code> secret, containing Ceph configuration:</p>
 <div class="highlight"><pre><span></span><code>oc apply -f - &lt;&lt;EOF
 apiVersion: v1
@@ -1070,6 +1119,7 @@ spec:
           - CinderVolume
           - CinderBackup
           - GlanceAPI
+          - ManilaShare
           extraVolType: Ceph
           volumes:
           - name: ceph
@@ -1094,7 +1144,7 @@ the FSID value. You can fetch the value from the config like so:</p>
   <small>
     
       Last update:
-      2023-08-16
+      2023-11-09
     
   </small>
 </div>

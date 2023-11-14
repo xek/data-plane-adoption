@@ -657,6 +657,26 @@
   
   
     <li class="md-nav__item">
+      <a href="../manila_adoption/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Manila adoption
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../edpm_adoption/" class="md-nav__link">
         
   
@@ -1070,13 +1090,14 @@ podified OpenStack control plane services.</p>
   passwords can be extracted like this:</p>
 <div class="highlight"><pre><span></span><code>CINDER_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep &#39; CinderPassword:&#39; | awk -F &#39;: &#39; &#39;{ print $2; }&#39;)
 GLANCE_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep &#39; GlancePassword:&#39; | awk -F &#39;: &#39; &#39;{ print $2; }&#39;)
+HEAT_AUTH_ENCRYPTION_KEY=$(cat ~/tripleo-standalone-passwords.yaml | grep &#39; HeatAuthEncryptionKey:&#39; | awk -F &#39;: &#39; &#39;{ print $2; }&#39;)
+HEAT_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep &#39; HeatPassword:&#39; | awk -F &#39;: &#39; &#39;{ print $2; }&#39;)
 IRONIC_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep &#39; IronicPassword:&#39; | awk -F &#39;: &#39; &#39;{ print $2; }&#39;)
+MANILA_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep &#39; ManilaPassword:&#39; | awk -F &#39;: &#39; &#39;{ print $2; }&#39;)
 NEUTRON_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep &#39; NeutronPassword:&#39; | awk -F &#39;: &#39; &#39;{ print $2; }&#39;)
 NOVA_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep &#39; NovaPassword:&#39; | awk -F &#39;: &#39; &#39;{ print $2; }&#39;)
 OCTAVIA_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep &#39; OctaviaPassword:&#39; | awk -F &#39;: &#39; &#39;{ print $2; }&#39;)
 PLACEMENT_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep &#39; PlacementPassword:&#39; | awk -F &#39;: &#39; &#39;{ print $2; }&#39;)
-HEAT_AUTH_ENCRYPTION_KEY=$(cat ~/tripleo-standalone-passwords.yaml | grep &#39; HeatAuthEncryptionKey:&#39; | awk -F &#39;: &#39; &#39;{ print $2; }&#39;)
-HEAT_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep &#39; HeatPassword:&#39; | awk -F &#39;: &#39; &#39;{ print $2; }&#39;)
 </code></pre></div>
 <h2 id="pre-checks">Pre-checks<a class="headerlink" href="#pre-checks" title="Permanent link">#</a></h2>
 <h2 id="procedure-backend-services-deployment">Procedure - backend services deployment<a class="headerlink" href="#procedure-backend-services-deployment" title="Permanent link">#</a></h2>
@@ -1107,13 +1128,14 @@ make input
 </ul>
 <div class="highlight"><pre><span></span><code>oc set data secret/osp-secret &quot;CinderPassword=$CINDER_PASSWORD&quot;
 oc set data secret/osp-secret &quot;GlancePassword=$GLANCE_PASSWORD&quot;
+oc set data secret/osp-secret &quot;HeatAuthEncryptionKey=$HEAT_AUTH_ENCRYPTION_KEY&quot;
+oc set data secret/osp-secret &quot;HeatPassword=$HEAT_PASSWORD&quot;
 oc set data secret/osp-secret &quot;IronicPassword=$IRONIC_PASSWORD&quot;
+oc set data secret/osp-secret &quot;ManilaPassword=$MANILA_PASSWORD&quot;
 oc set data secret/osp-secret &quot;NeutronPassword=$NEUTRON_PASSWORD&quot;
 oc set data secret/osp-secret &quot;NovaPassword=$NOVA_PASSWORD&quot;
 oc set data secret/osp-secret &quot;OctaviaPassword=$OCTAVIA_PASSWORD&quot;
 oc set data secret/osp-secret &quot;PlacementPassword=$PLACEMENT_PASSWORD&quot;
-oc set data secret/osp-secret &quot;HeatPassword=$HEAT_PASSWORD&quot;
-oc set data secret/osp-secret &quot;HeatAuthEncryptionKey=$HEAT_AUTH_ENCRYPTION_KEY&quot;
 </code></pre></div>
 <ul>
 <li>Deploy OpenStackControlPlane. <strong>Make sure to only enable DNS,
@@ -1252,7 +1274,7 @@ oc set data secret/osp-secret &quot;HeatAuthEncryptionKey=$HEAT_AUTH_ENCRYPTION_
   <small>
     
       Last update:
-      2023-10-12
+      2023-11-03
     
   </small>
 </div>
