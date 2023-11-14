@@ -1074,7 +1074,7 @@ openstack endpoint list | grep placement
 
 # Without OpenStack CLI placement plugin installed:
 PLACEMENT_PUBLIC_URL=$(openstack endpoint list -c &#39;Service Name&#39; -c &#39;Service Type&#39; -c URL | grep placement | grep public | awk &#39;{ print $6; }&#39;)
-curl &quot;$PLACEMENT_PUBLIC_URL&quot;
+oc exec -t openstackclient -- curl &quot;$PLACEMENT_PUBLIC_URL&quot;
 
 # With OpenStack CLI placement plugin installed:
 openstack resource class list
@@ -1085,7 +1085,7 @@ openstack resource class list
   <small>
     
       Last update:
-      2023-10-02
+      2023-11-14
     
   </small>
 </div>
