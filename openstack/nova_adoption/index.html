@@ -12,13 +12,13 @@
         <meta name="author" content="OpenStack Team">
       
       
-        <link rel="canonical" href="https://openstack-k8s-operators.github.io/data-plane-adoption/openstack/backend_services_deployment/">
+        <link rel="canonical" href="https://openstack-k8s-operators.github.io/data-plane-adoption/openstack/nova_adoption/">
       
       
-        <link rel="prev" href="../planning/">
+        <link rel="prev" href="../placement_adoption/">
       
       
-        <link rel="next" href="../pull_openstack_configuration/">
+        <link rel="next" href="../cinder_adoption/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
@@ -26,7 +26,7 @@
     
     
       
-        <title>Backend services deployment - OpenStack Data Plane Adoption</title>
+        <title>Nova adoption - OpenStack Data Plane Adoption</title>
       
     
     
@@ -81,7 +81,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#backend-services-deployment" class="md-skip">
+        <a href="#nova-adoption" class="md-skip">
           Skip to content
         </a>
       
@@ -120,7 +120,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Backend services deployment
+              Nova adoption
             
           </span>
         </div>
@@ -340,29 +340,9 @@
                 
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Backend services deployment
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../backend_services_deployment/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -371,71 +351,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#prerequisites" class="md-nav__link">
-    <span class="md-ellipsis">
-      Prerequisites
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#variables" class="md-nav__link">
-    <span class="md-ellipsis">
-      Variables
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#pre-checks" class="md-nav__link">
-    <span class="md-ellipsis">
-      Pre-checks
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#procedure-backend-services-deployment" class="md-nav__link">
-    <span class="md-ellipsis">
-      Procedure - backend services deployment
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#post-checks" class="md-nav__link">
-    <span class="md-ellipsis">
-      Post-checks
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -625,9 +540,29 @@
                 
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../nova_adoption/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Nova adoption
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -636,6 +571,62 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prerequisites
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Variables
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#procedure-nova-adoption" class="md-nav__link">
+    <span class="md-ellipsis">
+      Procedure - Nova adoption
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#post-checks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Post-checks
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1039,18 +1030,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#pre-checks" class="md-nav__link">
+  <a href="#procedure-nova-adoption" class="md-nav__link">
     <span class="md-ellipsis">
-      Pre-checks
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#procedure-backend-services-deployment" class="md-nav__link">
-    <span class="md-ellipsis">
-      Procedure - backend services deployment
+      Procedure - Nova adoption
     </span>
   </a>
   
@@ -1083,229 +1065,123 @@
   
 
 
-<h1 id="backend-services-deployment">Backend services deployment<a class="headerlink" href="#backend-services-deployment" title="Permanent link">#</a></h1>
-<p>The following instructions create OpenStackControlPlane CR with basic
-backend services deployed, and all the OpenStack services disabled.
-This will be the foundation of the podified control plane.</p>
-<p>In subsequent steps, we'll import the original databases and then add
-podified OpenStack control plane services.</p>
+<h1 id="nova-adoption">Nova adoption<a class="headerlink" href="#nova-adoption" title="Permanent link">#</a></h1>
+<blockquote>
+<p><strong>NOTE</strong> This example scenario describes a simple single-cell setup. Real
+multi-stack topology recommended for production use results in different
+cells DBs layout, and should be using different naming schemes (not covered
+here this time).</p>
+</blockquote>
 <h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h2>
 <ul>
-<li>
-<p>The cloud which we want to adopt is up and running. It's on
-  OpenStack Wallaby release.</p>
-</li>
-<li>
-<p>The <code>openstack-operator</code> is deployed, but <code>OpenStackControlPlane</code> is
-  <strong>not</strong> deployed.</p>
-</li>
+<li>Previous Adoption steps completed. Notably,</li>
+<li>the <a href="../mariadb_copy/">service databases</a>
+    must already be imported into the podified MariaDB;</li>
+<li>the <a href="../keystone_adoption/">Keystone service</a> needs to be imported;</li>
+<li>the <a href="../placement_adoption/">Placement service</a> needs to be imported;</li>
+<li>the <a href="../glance_adoption/">Glance service</a> needs to be imported;</li>
+<li>the <a href="../ovn_adoption/">OVN DB services</a> need to be imported;</li>
+<li>the <a href="../neutron_adoption/">Neutron service</a> needs to be imported;</li>
+<li>Required services specific topology <a href="../pull_openstack_configuration/#get-services-topology-specific-configuration">configuration collected</a>;</li>
+<li>OpenStack services have been <a href="../stop_openstack_services/">stopped</a></li>
 </ul>
-<p>For developer/CI environments, the openstack operator can be deployed
-  by running <code>make openstack</code> inside
-  <a href="https://github.com/openstack-k8s-operators/install_yamls">install_yamls</a>
-  repo.</p>
-<p>For production environments, the deployment method will likely be
-  different.</p>
-<ul>
-<li>There are free PVs available to be claimed (for MariaDB and RabbitMQ).</li>
-</ul>
-<p>For developer/CI environments driven by install_yamls, make sure
-  you've run <code>make crc_storage</code>.</p>
 <h2 id="variables">Variables<a class="headerlink" href="#variables" title="Permanent link">#</a></h2>
-<ul>
-<li>Set the desired admin password for the podified deployment. This can
-  be the original deployment's admin password or something else.</li>
-</ul>
-<div class="highlight"><pre><span></span><code>ADMIN_PASSWORD=SomePassword
+<p>Define the shell variables and aliases used in the steps below. The values are
+just illustrative, use values that are correct for your environment:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">alias</span><span class="w"> </span><span class="nv">openstack</span><span class="o">=</span><span class="s2">&quot;oc exec -t openstackclient -- openstack&quot;</span>
 </code></pre></div>
-<p>To use the existing OpenStack deployment password:
-  <div class="highlight"><pre><span></span><code>ADMIN_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep &#39; AdminPassword:&#39; | awk -F &#39;: &#39; &#39;{ print $2; }&#39;)
-</code></pre></div></p>
+<h2 id="procedure-nova-adoption">Procedure - Nova adoption<a class="headerlink" href="#procedure-nova-adoption" title="Permanent link">#</a></h2>
+<blockquote>
+<p><strong>NOTE</strong>: We assume Nova Metadata deployed on the top level and not on each
+cell level, so this example imports it the same way. If the source deployment
+has a per cell metadata deployment, adjust the given below patch as needed.
+Metadata service cannot be run in <code>cell0</code>.</p>
+</blockquote>
 <ul>
-<li>Set service password variables to match the original deployment.
-  Database passwords can differ in podified environment, but
-  synchronizing the service account passwords is a required step.</li>
+<li>Patch OpenStackControlPlane to deploy Nova:</li>
 </ul>
-<p>E.g. in developer environments with TripleO Standalone, the
-  passwords can be extracted like this:</p>
-<div class="highlight"><pre><span></span><code>CINDER_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep &#39; CinderPassword:&#39; | awk -F &#39;: &#39; &#39;{ print $2; }&#39;)
-GLANCE_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep &#39; GlancePassword:&#39; | awk -F &#39;: &#39; &#39;{ print $2; }&#39;)
-HEAT_AUTH_ENCRYPTION_KEY=$(cat ~/tripleo-standalone-passwords.yaml | grep &#39; HeatAuthEncryptionKey:&#39; | awk -F &#39;: &#39; &#39;{ print $2; }&#39;)
-HEAT_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep &#39; HeatPassword:&#39; | awk -F &#39;: &#39; &#39;{ print $2; }&#39;)
-IRONIC_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep &#39; IronicPassword:&#39; | awk -F &#39;: &#39; &#39;{ print $2; }&#39;)
-MANILA_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep &#39; ManilaPassword:&#39; | awk -F &#39;: &#39; &#39;{ print $2; }&#39;)
-NEUTRON_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep &#39; NeutronPassword:&#39; | awk -F &#39;: &#39; &#39;{ print $2; }&#39;)
-NOVA_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep &#39; NovaPassword:&#39; | awk -F &#39;: &#39; &#39;{ print $2; }&#39;)
-OCTAVIA_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep &#39; OctaviaPassword:&#39; | awk -F &#39;: &#39; &#39;{ print $2; }&#39;)
-PLACEMENT_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep &#39; PlacementPassword:&#39; | awk -F &#39;: &#39; &#39;{ print $2; }&#39;)
-</code></pre></div>
-<h2 id="pre-checks">Pre-checks<a class="headerlink" href="#pre-checks" title="Permanent link">#</a></h2>
-<h2 id="procedure-backend-services-deployment">Procedure - backend services deployment<a class="headerlink" href="#procedure-backend-services-deployment" title="Permanent link">#</a></h2>
-<ul>
-<li>Make sure you are using the OpenShift namespace where you want the
-  podified control plane deployed:</li>
-</ul>
-<div class="highlight"><pre><span></span><code>oc project openstack
-</code></pre></div>
-<ul>
-<li>Create OSP secret.</li>
-</ul>
-<p>The procedure for this will vary, but in developer/CI environments
-  we use install_yamls:</p>
-<div class="highlight"><pre><span></span><code># in install_yamls
-make input
-</code></pre></div>
-<ul>
-<li>If the <code>$ADMIN_PASSWORD</code> is different than the already set password
-  in <code>osp-secret</code>, amend the <code>AdminPassword</code> key in the <code>osp-secret</code>
-  correspondingly:</li>
-</ul>
-<div class="highlight"><pre><span></span><code>oc set data secret/osp-secret &quot;AdminPassword=$ADMIN_PASSWORD&quot;
-</code></pre></div>
-<ul>
-<li>Set service account passwords in <code>osp-secret</code> to match the service
-  account passwords from the original deployment:</li>
-</ul>
-<div class="highlight"><pre><span></span><code>oc set data secret/osp-secret &quot;CinderPassword=$CINDER_PASSWORD&quot;
-oc set data secret/osp-secret &quot;GlancePassword=$GLANCE_PASSWORD&quot;
-oc set data secret/osp-secret &quot;HeatAuthEncryptionKey=$HEAT_AUTH_ENCRYPTION_KEY&quot;
-oc set data secret/osp-secret &quot;HeatPassword=$HEAT_PASSWORD&quot;
-oc set data secret/osp-secret &quot;IronicPassword=$IRONIC_PASSWORD&quot;
-oc set data secret/osp-secret &quot;ManilaPassword=$MANILA_PASSWORD&quot;
-oc set data secret/osp-secret &quot;NeutronPassword=$NEUTRON_PASSWORD&quot;
-oc set data secret/osp-secret &quot;NovaPassword=$NOVA_PASSWORD&quot;
-oc set data secret/osp-secret &quot;OctaviaPassword=$OCTAVIA_PASSWORD&quot;
-oc set data secret/osp-secret &quot;PlacementPassword=$PLACEMENT_PASSWORD&quot;
-</code></pre></div>
-<ul>
-<li>Deploy OpenStackControlPlane. <strong>Make sure to only enable DNS,
-  MariaDB, Memcached, and RabbitMQ services. All other services must
-  be disabled.</strong></li>
-</ul>
-<div class="highlight"><pre><span></span><code><span class="l l-Scalar l-Scalar-Plain">oc apply -f - &lt;&lt;EOF</span>
-<span class="l l-Scalar l-Scalar-Plain">apiVersion</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">core.openstack.org/v1beta1</span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">OpenStackControlPlane</span>
-<span class="nt">metadata</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openstack</span>
-<span class="nt">spec</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">secret</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">osp-secret</span>
-<span class="w">  </span><span class="nt">storageClass</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">local-storage</span>
-
-<span class="w">  </span><span class="nt">cinder</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
-<span class="w">    </span><span class="nt">template</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">cinderAPI</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
-<span class="w">      </span><span class="nt">cinderScheduler</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
-<span class="w">      </span><span class="nt">cinderBackup</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
-<span class="w">      </span><span class="nt">cinderVolumes</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
-
-<span class="w">  </span><span class="nt">dns</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">template</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">override</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">service</span><span class="p">:</span>
-<span class="w">          </span><span class="nt">metadata</span><span class="p">:</span>
-<span class="w">            </span><span class="nt">annotations</span><span class="p">:</span>
-<span class="w">              </span><span class="nt">metallb.universe.tf/address-pool</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ctlplane</span>
-<span class="w">              </span><span class="nt">metallb.universe.tf/allow-shared-ip</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ctlplane</span>
-<span class="w">              </span><span class="nt">metallb.universe.tf/loadBalancerIPs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">192.168.122.80</span>
-<span class="w">          </span><span class="nt">spec</span><span class="p">:</span>
-<span class="w">            </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LoadBalancer</span>
-<span class="w">      </span><span class="nt">options</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">server</span>
-<span class="w">        </span><span class="nt">values</span><span class="p">:</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">192.168.122.1</span>
-<span class="w">      </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-
-<span class="w">  </span><span class="nt">glance</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
-<span class="w">    </span><span class="nt">template</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">glanceAPI</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
-
-<span class="w">  </span><span class="nt">horizon</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
-<span class="w">    </span><span class="nt">template</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
-
-<span class="w">  </span><span class="nt">ironic</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
-<span class="w">    </span><span class="nt">template</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">ironicConductors</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
-
-<span class="w">  </span><span class="nt">keystone</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
-<span class="w">    </span><span class="nt">template</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
-
-<span class="w">  </span><span class="nt">manila</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
-<span class="w">    </span><span class="nt">template</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">manilaAPI</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
-<span class="w">      </span><span class="nt">manilaScheduler</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
-<span class="w">      </span><span class="nt">manilaShares</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
-
-<span class="w">  </span><span class="nt">mariadb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">templates</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">openstack</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">storageRequest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">500M</span>
-<span class="w">      </span><span class="nt">openstack-cell1</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">storageRequest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">500M</span>
-
-<span class="w">  </span><span class="nt">memcached</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-<span class="w">    </span><span class="nt">templates</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">memcached</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-
-<span class="w">  </span><span class="nt">neutron</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
-<span class="w">    </span><span class="nt">template</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
-
+<div class="highlight"><pre><span></span><code><span class="l l-Scalar l-Scalar-Plain">oc patch openstackcontrolplane openstack -n openstack --type=merge --patch &#39;</span>
+<span class="l l-Scalar l-Scalar-Plain">spec</span><span class="p p-Indicator">:</span>
 <span class="w">  </span><span class="nt">nova</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
-<span class="w">    </span><span class="nt">template</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
-
-<span class="w">  </span><span class="nt">ovn</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">apiOverride</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">route</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
 <span class="w">    </span><span class="nt">template</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">ovnController</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">external-ids</span><span class="p">:</span>
-<span class="w">          </span><span class="nt">system-id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;random&quot;</span>
-<span class="w">          </span><span class="nt">ovn-bridge</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;br-int&quot;</span>
-<span class="w">          </span><span class="nt">ovn-encap-type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;geneve&quot;</span>
-
-<span class="w">  </span><span class="nt">placement</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
-<span class="w">    </span><span class="nt">template</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
-
-<span class="w">  </span><span class="nt">rabbitmq</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">templates</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">rabbitmq</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">secret</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">osp-secret</span>
+<span class="w">      </span><span class="nt">apiServiceTemplate</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">override</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">service</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">internal</span><span class="p">:</span>
+<span class="w">              </span><span class="nt">metadata</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">annotations</span><span class="p">:</span>
+<span class="w">                  </span><span class="nt">metallb.universe.tf/address-pool</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">internalapi</span>
+<span class="w">                  </span><span class="nt">metallb.universe.tf/allow-shared-ip</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">internalapi</span>
+<span class="w">                  </span><span class="nt">metallb.universe.tf/loadBalancerIPs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">172.17.0.80</span>
+<span class="w">              </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LoadBalancer</span>
+<span class="w">        </span><span class="nt">customServiceConfig</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">          </span><span class="no">[workarounds]</span>
+<span class="w">          </span><span class="no">disable_compute_service_check_for_ffu=true</span>
+<span class="w">      </span><span class="nt">metadataServiceTemplate</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"> </span><span class="c1"># deploy single nova metadata on the top level</span>
 <span class="w">        </span><span class="nt">override</span><span class="p">:</span>
 <span class="w">          </span><span class="nt">service</span><span class="p">:</span>
 <span class="w">            </span><span class="nt">metadata</span><span class="p">:</span>
 <span class="w">              </span><span class="nt">annotations</span><span class="p">:</span>
 <span class="w">                </span><span class="nt">metallb.universe.tf/address-pool</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">internalapi</span>
-<span class="w">                </span><span class="nt">metallb.universe.tf/loadBalancerIPs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">172.17.0.85</span>
+<span class="w">                </span><span class="nt">metallb.universe.tf/allow-shared-ip</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">internalapi</span>
+<span class="w">                </span><span class="nt">metallb.universe.tf/loadBalancerIPs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">172.17.0.80</span>
 <span class="w">            </span><span class="nt">spec</span><span class="p">:</span>
 <span class="w">              </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LoadBalancer</span>
-<span class="w">      </span><span class="nt">rabbitmq-cell1</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">override</span><span class="p">:</span>
-<span class="w">          </span><span class="nt">service</span><span class="p">:</span>
-<span class="w">            </span><span class="nt">metadata</span><span class="p">:</span>
-<span class="w">              </span><span class="nt">annotations</span><span class="p">:</span>
-<span class="w">                </span><span class="nt">metallb.universe.tf/address-pool</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">internalapi</span>
-<span class="w">                </span><span class="nt">metallb.universe.tf/loadBalancerIPs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">172.17.0.86</span>
-<span class="w">            </span><span class="nt">spec</span><span class="p">:</span>
-<span class="w">              </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LoadBalancer</span>
-
-<span class="w">  </span><span class="nt">telemetry</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
-<span class="w">    </span><span class="nt">template</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
-<span class="l l-Scalar l-Scalar-Plain">EOF</span>
+<span class="w">        </span><span class="nt">customServiceConfig</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">          </span><span class="no">[workarounds]</span>
+<span class="w">          </span><span class="no">disable_compute_service_check_for_ffu=true</span>
+<span class="w">      </span><span class="nt">schedulerServiceTemplate</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">customServiceConfig</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">          </span><span class="no">[workarounds]</span>
+<span class="w">          </span><span class="no">disable_compute_service_check_for_ffu=true</span>
+<span class="w">      </span><span class="nt">cellTemplates</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">cell0</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">conductorServiceTemplate</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">customServiceConfig</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">              </span><span class="no">[workarounds]</span>
+<span class="w">              </span><span class="no">disable_compute_service_check_for_ffu=true</span>
+<span class="w">        </span><span class="nt">cell1</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">metadataServiceTemplate</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"> </span><span class="c1"># enable here to run it in a cell instead</span>
+<span class="w">            </span><span class="nt">override</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">service</span><span class="p">:</span>
+<span class="w">                  </span><span class="nt">metadata</span><span class="p">:</span>
+<span class="w">                    </span><span class="nt">annotations</span><span class="p">:</span>
+<span class="w">                      </span><span class="nt">metallb.universe.tf/address-pool</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">internalapi</span>
+<span class="w">                      </span><span class="nt">metallb.universe.tf/allow-shared-ip</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">internalapi</span>
+<span class="w">                      </span><span class="nt">metallb.universe.tf/loadBalancerIPs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">172.17.0.80</span>
+<span class="w">                  </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">                    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LoadBalancer</span>
+<span class="w">            </span><span class="nt">customServiceConfig</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">              </span><span class="no">[workarounds]</span>
+<span class="w">              </span><span class="no">disable_compute_service_check_for_ffu=true</span>
+<span class="w">          </span><span class="nt">conductorServiceTemplate</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">customServiceConfig</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">              </span><span class="no">[workarounds]</span>
+<span class="w">              </span><span class="no">disable_compute_service_check_for_ffu=true</span>
+<span class="s">&#39;</span>
 </code></pre></div>
+<ul>
+<li>Wait for Nova control plane services' CRs to become ready:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>oc<span class="w"> </span><span class="nb">wait</span><span class="w"> </span>--for<span class="w"> </span><span class="nv">condition</span><span class="o">=</span>Ready<span class="w"> </span>--timeout<span class="o">=</span>300s<span class="w"> </span>Nova/nova
+</code></pre></div>
+<p>The local Conductor services will be started for each cell, while the superconductor runs in <code>cell0</code>.
+  Note that <code>disable_compute_service_check_for_ffu</code> is mandatory for all imported Nova services, until
+  the <a href="../edpm_adoption/">external dataplane imported</a>, and until Nova Compute services fast-forward upgraded.</p>
 <h2 id="post-checks">Post-checks<a class="headerlink" href="#post-checks" title="Permanent link">#</a></h2>
 <ul>
-<li>Check that MariaDB is running.</li>
+<li>Check that Nova endpoints are defined and pointing to the
+  podified FQDNs and that Nova API responds.</li>
 </ul>
-<div class="highlight"><pre><span></span><code>oc get pod mariadb-openstack -o jsonpath=&#39;{.status.phase}{&quot;\n&quot;}&#39;
+<div class="highlight"><pre><span></span><code>openstack<span class="w"> </span>endpoint<span class="w"> </span>list<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>nova
+openstack<span class="w"> </span>server<span class="w"> </span>list
 </code></pre></div>
 
   <hr>
@@ -1313,7 +1189,7 @@ oc set data secret/osp-secret &quot;PlacementPassword=$PLACEMENT_PASSWORD&quot;
   <small>
     
       Last update:
-      2023-10-29
+      2023-09-29
     
   </small>
 </div>

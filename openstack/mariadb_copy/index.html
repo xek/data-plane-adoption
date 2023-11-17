@@ -627,6 +627,26 @@
   
   
     <li class="md-nav__item">
+      <a href="../nova_adoption/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Nova adoption
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../cinder_adoption/" class="md-nav__link">
         
   
@@ -1067,6 +1087,12 @@
 <p>This document describes how to move the databases from the original
 OpenStack deployment to the MariaDB instances in the OpenShift
 cluster.</p>
+<blockquote>
+<p><strong>NOTE</strong> This example scenario describes a simple single-cell setup. Real
+multi-stack topology recommended for production use results in different
+cells DBs layout, and should be using different naming schemes (not covered
+here this time).</p>
+</blockquote>
 <h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h2>
 <ul>
 <li>
@@ -1080,7 +1106,7 @@ cluster.</p>
     control plane services are running.</p>
 </li>
 <li>
-<p>OpenStack services have been stopped</p>
+<p>OpenStack services have been <a href="../stop_openstack_services/">stopped</a></p>
 </li>
 <li>
 <p>There must be network routability between:</p>
@@ -1108,126 +1134,139 @@ cluster.</p>
 <h2 id="variables">Variables<a class="headerlink" href="#variables" title="Permanent link">#</a></h2>
 <p>Define the shell variables used in the steps below. The values are
 just illustrative, use values that are correct for your environment:</p>
-<div class="highlight"><pre><span></span><code>MARIADB_IMAGE=quay.io/podified-antelope-centos9/openstack-mariadb:current-podified
+<div class="highlight"><pre><span></span><code><span class="nv">MARIADB_IMAGE</span><span class="o">=</span>quay.io/podified-antelope-centos9/openstack-mariadb:current-podified
 
-PODIFIED_MARIADB_IP=$(oc get svc --selector &quot;cr=mariadb-openstack&quot; -ojsonpath=&#39;{.items[0].spec.clusterIP}&#39;)
-PODIFIED_CELL1_MARIADB_IP=$(oc get svc --selector &quot;cr=mariadb-openstack-cell1&quot; -ojsonpath=&#39;{.items[0].spec.clusterIP}&#39;)
-PODIFIED_DB_ROOT_PASSWORD=$(oc get -o json secret/osp-secret | jq -r .data.DbRootPassword | base64 -d)
+<span class="nv">PODIFIED_MARIADB_IP</span><span class="o">=</span><span class="k">$(</span>oc<span class="w"> </span>get<span class="w"> </span>svc<span class="w"> </span>--selector<span class="w"> </span><span class="s2">&quot;cr=mariadb-openstack&quot;</span><span class="w"> </span>-ojsonpath<span class="o">=</span><span class="s1">&#39;{.items[0].spec.clusterIP}&#39;</span><span class="k">)</span>
+<span class="nv">PODIFIED_CELL1_MARIADB_IP</span><span class="o">=</span><span class="k">$(</span>oc<span class="w"> </span>get<span class="w"> </span>svc<span class="w"> </span>--selector<span class="w"> </span><span class="s2">&quot;cr=mariadb-openstack-cell1&quot;</span><span class="w"> </span>-ojsonpath<span class="o">=</span><span class="s1">&#39;{.items[0].spec.clusterIP}&#39;</span><span class="k">)</span>
+<span class="nv">PODIFIED_DB_ROOT_PASSWORD</span><span class="o">=</span><span class="k">$(</span>oc<span class="w"> </span>get<span class="w"> </span>-o<span class="w"> </span>json<span class="w"> </span>secret/osp-secret<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span>.data.DbRootPassword<span class="w"> </span><span class="p">|</span><span class="w"> </span>base64<span class="w"> </span>-d<span class="k">)</span>
 
-# Replace with your environment&#39;s MariaDB IP:
-SOURCE_MARIADB_IP=192.168.122.100
-SOURCE_DB_ROOT_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep &#39; MysqlRootPassword:&#39; | awk -F &#39;: &#39; &#39;{ print $2; }&#39;)
+<span class="c1"># Replace with your environment&#39;s MariaDB IP:</span>
+<span class="nv">SOURCE_MARIADB_IP</span><span class="o">=</span><span class="m">192</span>.168.122.100
+<span class="nv">SOURCE_DB_ROOT_PASSWORD</span><span class="o">=</span><span class="k">$(</span>cat<span class="w"> </span>~/tripleo-standalone-passwords.yaml<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s1">&#39; MysqlRootPassword:&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span>-F<span class="w"> </span><span class="s1">&#39;: &#39;</span><span class="w"> </span><span class="s1">&#39;{ print $2; }&#39;</span><span class="k">)</span>
 
-# The CHARACTER_SET and collation should match the source DB
-# if the do not then it will break foreign key relationships
-# for any tables that are created in the future as part of db sync
-CHARACTER_SET=utf8
-COLLATION=utf8_general_ci
+<span class="c1"># The CHARACTER_SET and collation should match the source DB</span>
+<span class="c1"># if the do not then it will break foreign key relationships</span>
+<span class="c1"># for any tables that are created in the future as part of db sync</span>
+<span class="nv">CHARACTER_SET</span><span class="o">=</span>utf8
+<span class="nv">COLLATION</span><span class="o">=</span>utf8_general_ci
 </code></pre></div>
 <h2 id="pre-checks">Pre-checks<a class="headerlink" href="#pre-checks" title="Permanent link">#</a></h2>
 <ul>
 <li>Test connection to the original DB (show databases):</li>
 </ul>
-<div class="highlight"><pre><span></span><code>podman run -i --rm --userns=keep-id -u $UID $MARIADB_IMAGE \
-    mysql -h &quot;$SOURCE_MARIADB_IP&quot; -uroot &quot;-p$SOURCE_DB_ROOT_PASSWORD&quot; -e &#39;SHOW databases;&#39;
+<div class="highlight"><pre><span></span><code>podman<span class="w"> </span>run<span class="w"> </span>-i<span class="w"> </span>--rm<span class="w"> </span>--userns<span class="o">=</span>keep-id<span class="w"> </span>-u<span class="w"> </span><span class="nv">$UID</span><span class="w"> </span><span class="nv">$MARIADB_IMAGE</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>mysql<span class="w"> </span>-h<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$SOURCE_MARIADB_IP</span><span class="s2">&quot;</span><span class="w"> </span>-uroot<span class="w"> </span><span class="s2">&quot;-p</span><span class="nv">$SOURCE_DB_ROOT_PASSWORD</span><span class="s2">&quot;</span><span class="w"> </span>-e<span class="w"> </span><span class="s1">&#39;SHOW databases;&#39;</span>
 </code></pre></div>
 <ul>
 <li>Run mysqlcheck on the original DB to look for things that are not OK:</li>
 </ul>
-<div class="highlight"><pre><span></span><code>podman run -i --rm --userns=keep-id -u $UID $MARIADB_IMAGE \
-    mysqlcheck --all-databases -h $SOURCE_MARIADB_IP -u root &quot;-p$SOURCE_DB_ROOT_PASSWORD&quot; | grep -v OK
+<div class="highlight"><pre><span></span><code>podman<span class="w"> </span>run<span class="w"> </span>-i<span class="w"> </span>--rm<span class="w"> </span>--userns<span class="o">=</span>keep-id<span class="w"> </span>-u<span class="w"> </span><span class="nv">$UID</span><span class="w"> </span><span class="nv">$MARIADB_IMAGE</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>mysqlcheck<span class="w"> </span>--all-databases<span class="w"> </span>-h<span class="w"> </span><span class="nv">$SOURCE_MARIADB_IP</span><span class="w"> </span>-u<span class="w"> </span>root<span class="w"> </span><span class="s2">&quot;-p</span><span class="nv">$SOURCE_DB_ROOT_PASSWORD</span><span class="s2">&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-v<span class="w"> </span>OK
 </code></pre></div>
 <ul>
 <li>Test connection to podified DBs (show databases):</li>
 </ul>
-<div class="highlight"><pre><span></span><code>oc run mariadb-client --image $MARIADB_IMAGE -i --rm --restart=Never -- \
-    mysql -h &quot;$PODIFIED_MARIADB_IP&quot; -uroot &quot;-p$PODIFIED_DB_ROOT_PASSWORD&quot; -e &#39;SHOW databases;&#39;
-oc run mariadb-client --image $MARIADB_IMAGE -i --rm --restart=Never -- \
-    mysql -h &quot;$PODIFIED_CELL1_MARIADB_IP&quot; -uroot &quot;-p$PODIFIED_DB_ROOT_PASSWORD&quot; -e &#39;SHOW databases;&#39;
+<div class="highlight"><pre><span></span><code>oc<span class="w"> </span>run<span class="w"> </span>mariadb-client<span class="w"> </span>--image<span class="w"> </span><span class="nv">$MARIADB_IMAGE</span><span class="w"> </span>-i<span class="w"> </span>--rm<span class="w"> </span>--restart<span class="o">=</span>Never<span class="w"> </span>--<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>mysql<span class="w"> </span>-h<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$PODIFIED_MARIADB_IP</span><span class="s2">&quot;</span><span class="w"> </span>-uroot<span class="w"> </span><span class="s2">&quot;-p</span><span class="nv">$PODIFIED_DB_ROOT_PASSWORD</span><span class="s2">&quot;</span><span class="w"> </span>-e<span class="w"> </span><span class="s1">&#39;SHOW databases;&#39;</span>
+oc<span class="w"> </span>run<span class="w"> </span>mariadb-client<span class="w"> </span>--image<span class="w"> </span><span class="nv">$MARIADB_IMAGE</span><span class="w"> </span>-i<span class="w"> </span>--rm<span class="w"> </span>--restart<span class="o">=</span>Never<span class="w"> </span>--<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>mysql<span class="w"> </span>-h<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$PODIFIED_CELL1_MARIADB_IP</span><span class="s2">&quot;</span><span class="w"> </span>-uroot<span class="w"> </span><span class="s2">&quot;-p</span><span class="nv">$PODIFIED_DB_ROOT_PASSWORD</span><span class="s2">&quot;</span><span class="w"> </span>-e<span class="w"> </span><span class="s1">&#39;SHOW databases;&#39;</span>
 </code></pre></div>
 <h2 id="procedure-data-copy">Procedure - data copy<a class="headerlink" href="#procedure-data-copy" title="Permanent link">#</a></h2>
+<blockquote>
+<p><strong>NOTE</strong>: We'll need to transition Nova services imported later on into a
+superconductor architecture. For that, delete the old service records in
+cells DBs, starting from the cell1. New records will be registered with
+different hostnames provided by the Nova service operator. All Nova
+services, except the compute agent, have no internal state, and its service
+records can be safely deleted. Also we need to rename the former <code>default</code> cell
+as <code>cell1</code>.</p>
+</blockquote>
 <ul>
 <li>Create a temporary folder to store DB dumps and make sure it's the
   working directory for the following steps:</li>
 </ul>
-<div class="highlight"><pre><span></span><code>mkdir ~/adoption-db
-cd ~/adoption-db
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>~/adoption-db
+<span class="nb">cd</span><span class="w"> </span>~/adoption-db
 </code></pre></div>
 <ul>
 <li>Create a dump of the original databases:</li>
 </ul>
-<div class="highlight"><pre><span></span><code>podman run -i --rm --userns=keep-id -u $UID -v $PWD:$PWD:z,rw -w $PWD $MARIADB_IMAGE bash &lt;&lt;EOF
+<div class="highlight"><pre><span></span><code>podman<span class="w"> </span>run<span class="w"> </span>-i<span class="w"> </span>--rm<span class="w"> </span>--userns<span class="o">=</span>keep-id<span class="w"> </span>-u<span class="w"> </span><span class="nv">$UID</span><span class="w"> </span>-v<span class="w"> </span><span class="nv">$PWD</span>:<span class="nv">$PWD</span>:z,rw<span class="w"> </span>-w<span class="w"> </span><span class="nv">$PWD</span><span class="w"> </span><span class="nv">$MARIADB_IMAGE</span><span class="w"> </span>bash<span class="w"> </span><span class="s">&lt;&lt;EOF</span>
 
-# Note we do not want to dump the information and performance schema tables so we filter them
-mysql -h ${SOURCE_MARIADB_IP} -u root &quot;-p${SOURCE_DB_ROOT_PASSWORD}&quot; -N -e &#39;show databases&#39; | grep -E -v &#39;schema|mysql&#39; | while read dbname; do
-    echo &quot;Dumping \${dbname}&quot;
-    mysqldump -h $SOURCE_MARIADB_IP -uroot &quot;-p$SOURCE_DB_ROOT_PASSWORD&quot; \
-        --single-transaction --complete-insert --skip-lock-tables --lock-tables=0 \
-        &quot;\${dbname}&quot; &gt; &quot;\${dbname}&quot;.sql
-done
+<span class="s"># Note we do not want to dump the information and performance schema tables so we filter them</span>
+<span class="s">mysql -h ${SOURCE_MARIADB_IP} -u root &quot;-p${SOURCE_DB_ROOT_PASSWORD}&quot; -N -e &#39;show databases&#39; | grep -E -v &#39;schema|mysql&#39; | while read dbname; do</span>
+<span class="s">    echo &quot;Dumping \${dbname}&quot;</span>
+<span class="s">    mysqldump -h $SOURCE_MARIADB_IP -uroot &quot;-p$SOURCE_DB_ROOT_PASSWORD&quot; \</span>
+<span class="s">        --single-transaction --complete-insert --skip-lock-tables --lock-tables=0 \</span>
+<span class="s">        &quot;\${dbname}&quot; &gt; &quot;\${dbname}&quot;.sql</span>
+<span class="s">done</span>
 
-EOF
+<span class="s">EOF</span>
 </code></pre></div>
 <ul>
 <li>Restore the databases from .sql files into the podified MariaDB:</li>
 </ul>
-<div class="highlight"><pre><span></span><code># db schemas to rename on import
-declare -A db_name_map
-db_name_map[&quot;nova&quot;]=&quot;nova_cell1&quot;
-db_name_map[&quot;ovs_neutron&quot;]=&quot;neutron&quot;
+<div class="highlight"><pre><span></span><code><span class="c1"># db schemas to rename on import</span>
+<span class="nb">declare</span><span class="w"> </span>-A<span class="w"> </span>db_name_map
+db_name_map<span class="o">[</span><span class="s2">&quot;nova&quot;</span><span class="o">]=</span><span class="s2">&quot;nova_cell1&quot;</span>
+db_name_map<span class="o">[</span><span class="s2">&quot;ovs_neutron&quot;</span><span class="o">]=</span><span class="s2">&quot;neutron&quot;</span>
 
-# db servers to import into
-declare -A db_server_map
-db_server_map[&quot;default&quot;]=${PODIFIED_MARIADB_IP}
-db_server_map[&quot;nova_cell1&quot;]=${PODIFIED_CELL1_MARIADB_IP}
+<span class="c1"># db servers to import into</span>
+<span class="nb">declare</span><span class="w"> </span>-A<span class="w"> </span>db_server_map
+db_server_map<span class="o">[</span><span class="s2">&quot;default&quot;</span><span class="o">]=</span><span class="si">${</span><span class="nv">PODIFIED_MARIADB_IP</span><span class="si">}</span>
+db_server_map<span class="o">[</span><span class="s2">&quot;nova_cell1&quot;</span><span class="o">]=</span><span class="si">${</span><span class="nv">PODIFIED_CELL1_MARIADB_IP</span><span class="si">}</span>
 
-# db server root password map
-declare -A db_server_password_map
-db_server_password_map[&quot;default&quot;]=${PODIFIED_DB_ROOT_PASSWORD}
-db_server_password_map[&quot;nova_cell1&quot;]=${PODIFIED_DB_ROOT_PASSWORD}
+<span class="c1"># db server root password map</span>
+<span class="nb">declare</span><span class="w"> </span>-A<span class="w"> </span>db_server_password_map
+db_server_password_map<span class="o">[</span><span class="s2">&quot;default&quot;</span><span class="o">]=</span><span class="si">${</span><span class="nv">PODIFIED_DB_ROOT_PASSWORD</span><span class="si">}</span>
+db_server_password_map<span class="o">[</span><span class="s2">&quot;nova_cell1&quot;</span><span class="o">]=</span><span class="si">${</span><span class="nv">PODIFIED_DB_ROOT_PASSWORD</span><span class="si">}</span>
 
-all_db_files=$(ls *.sql)
-for db_file in ${all_db_files}; do
-    db_name=$(echo ${db_file} | awk -F&#39;.&#39; &#39;{ print $1; }&#39;)
-    if [[ -v &quot;db_name_map[${db_name}]&quot; ]]; then
-        echo &quot;renaming ${db_name} to ${db_name_map[${db_name}]}&quot;
-        db_name=${db_name_map[${db_name}]}
-    fi
-    db_server=${db_server_map[&quot;default&quot;]}
-    if [[ -v &quot;db_server_map[${db_name}]&quot; ]]; then
-        db_server=${db_server_map[${db_name}]}
-    fi
-    db_password=${db_server_password_map[&quot;default&quot;]}
-    if [[ -v &quot;db_server_password_map[${db_name}]&quot; ]]; then
-        db_password=${db_server_password_map[${db_name}]}
-    fi
-    echo &quot;creating ${db_name} in ${db_server}&quot;
-    container_name=$(echo &quot;mariadb-client-${db_name}-create&quot; | sed &#39;s/_/-/g&#39;)
-    oc run ${container_name} --image ${MARIADB_IMAGE} -i --rm --restart=Never -- \
-        mysql -h &quot;${db_server}&quot; -uroot &quot;-p${db_password}&quot; &lt;&lt; EOF
-CREATE DATABASE IF NOT EXISTS ${db_name} DEFAULT CHARACTER SET ${CHARACTER_SET} DEFAULT COLLATE ${COLLATION};
-EOF
-    echo &quot;importing ${db_name} into ${db_server}&quot;
-    container_name=$(echo &quot;mariadb-client-${db_name}-restore&quot; | sed &#39;s/_/-/g&#39;)
-    oc run ${container_name} --image ${MARIADB_IMAGE} -i --rm --restart=Never -- \
-        mysql -h &quot;${db_server}&quot; -uroot &quot;-p${db_password}&quot; &quot;${db_name}&quot; &lt; &quot;${db_file}&quot;
-done
+<span class="nv">all_db_files</span><span class="o">=</span><span class="k">$(</span>ls<span class="w"> </span>*.sql<span class="k">)</span>
+<span class="k">for</span><span class="w"> </span>db_file<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="si">${</span><span class="nv">all_db_files</span><span class="si">}</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">    </span><span class="nv">db_name</span><span class="o">=</span><span class="k">$(</span><span class="nb">echo</span><span class="w"> </span><span class="si">${</span><span class="nv">db_file</span><span class="si">}</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span>-F<span class="s1">&#39;.&#39;</span><span class="w"> </span><span class="s1">&#39;{ print $1; }&#39;</span><span class="k">)</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span>-v<span class="w"> </span><span class="s2">&quot;db_name_map[</span><span class="si">${</span><span class="nv">db_name</span><span class="si">}</span><span class="s2">]&quot;</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">        </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;renaming </span><span class="si">${</span><span class="nv">db_name</span><span class="si">}</span><span class="s2"> to </span><span class="si">${</span><span class="nv">db_name_map</span><span class="p">[</span><span class="si">${</span><span class="nv">db_name</span><span class="si">}</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="w">        </span><span class="nv">db_name</span><span class="o">=</span><span class="si">${</span><span class="nv">db_name_map</span><span class="p">[</span><span class="si">${</span><span class="nv">db_name</span><span class="si">}</span><span class="p">]</span><span class="si">}</span>
+<span class="w">    </span><span class="k">fi</span>
+<span class="w">    </span><span class="nv">db_server</span><span class="o">=</span><span class="si">${</span><span class="nv">db_server_map</span><span class="p">[</span><span class="s2">&quot;default&quot;</span><span class="p">]</span><span class="si">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span>-v<span class="w"> </span><span class="s2">&quot;db_server_map[</span><span class="si">${</span><span class="nv">db_name</span><span class="si">}</span><span class="s2">]&quot;</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">        </span><span class="nv">db_server</span><span class="o">=</span><span class="si">${</span><span class="nv">db_server_map</span><span class="p">[</span><span class="si">${</span><span class="nv">db_name</span><span class="si">}</span><span class="p">]</span><span class="si">}</span>
+<span class="w">    </span><span class="k">fi</span>
+<span class="w">    </span><span class="nv">db_password</span><span class="o">=</span><span class="si">${</span><span class="nv">db_server_password_map</span><span class="p">[</span><span class="s2">&quot;default&quot;</span><span class="p">]</span><span class="si">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span>-v<span class="w"> </span><span class="s2">&quot;db_server_password_map[</span><span class="si">${</span><span class="nv">db_name</span><span class="si">}</span><span class="s2">]&quot;</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">        </span><span class="nv">db_password</span><span class="o">=</span><span class="si">${</span><span class="nv">db_server_password_map</span><span class="p">[</span><span class="si">${</span><span class="nv">db_name</span><span class="si">}</span><span class="p">]</span><span class="si">}</span>
+<span class="w">    </span><span class="k">fi</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;creating </span><span class="si">${</span><span class="nv">db_name</span><span class="si">}</span><span class="s2"> in </span><span class="si">${</span><span class="nv">db_server</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="w">    </span><span class="nv">container_name</span><span class="o">=</span><span class="k">$(</span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;mariadb-client-</span><span class="si">${</span><span class="nv">db_name</span><span class="si">}</span><span class="s2">-create&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span><span class="s1">&#39;s/_/-/g&#39;</span><span class="k">)</span>
+<span class="w">    </span>oc<span class="w"> </span>run<span class="w"> </span><span class="si">${</span><span class="nv">container_name</span><span class="si">}</span><span class="w"> </span>--image<span class="w"> </span><span class="si">${</span><span class="nv">MARIADB_IMAGE</span><span class="si">}</span><span class="w"> </span>-i<span class="w"> </span>--rm<span class="w"> </span>--restart<span class="o">=</span>Never<span class="w"> </span>--<span class="w"> </span><span class="se">\</span>
+<span class="w">        </span>mysql<span class="w"> </span>-h<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">db_server</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span>-uroot<span class="w"> </span><span class="s2">&quot;-p</span><span class="si">${</span><span class="nv">db_password</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span><span class="s">&lt;&lt; EOF</span>
+<span class="s">CREATE DATABASE IF NOT EXISTS ${db_name} DEFAULT CHARACTER SET ${CHARACTER_SET} DEFAULT COLLATE ${COLLATION};</span>
+<span class="s">EOF</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;importing </span><span class="si">${</span><span class="nv">db_name</span><span class="si">}</span><span class="s2"> into </span><span class="si">${</span><span class="nv">db_server</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="w">    </span><span class="nv">container_name</span><span class="o">=</span><span class="k">$(</span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;mariadb-client-</span><span class="si">${</span><span class="nv">db_name</span><span class="si">}</span><span class="s2">-restore&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span><span class="s1">&#39;s/_/-/g&#39;</span><span class="k">)</span>
+<span class="w">    </span>oc<span class="w"> </span>run<span class="w"> </span><span class="si">${</span><span class="nv">container_name</span><span class="si">}</span><span class="w"> </span>--image<span class="w"> </span><span class="si">${</span><span class="nv">MARIADB_IMAGE</span><span class="si">}</span><span class="w"> </span>-i<span class="w"> </span>--rm<span class="w"> </span>--restart<span class="o">=</span>Never<span class="w"> </span>--<span class="w"> </span><span class="se">\</span>
+<span class="w">        </span>mysql<span class="w"> </span>-h<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">db_server</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span>-uroot<span class="w"> </span><span class="s2">&quot;-p</span><span class="si">${</span><span class="nv">db_password</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">db_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span>&lt;<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">db_file</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="k">done</span>
+oc<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>mariadb-openstack<span class="w"> </span>--<span class="w"> </span>mysql<span class="w"> </span>--user<span class="o">=</span>root<span class="w"> </span>--password<span class="o">=</span><span class="si">${</span><span class="nv">db_server_password_map</span><span class="p">[</span><span class="s2">&quot;default&quot;</span><span class="p">]</span><span class="si">}</span><span class="w"> </span>-e<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="s2">&quot;update nova_api.cell_mappings set name=&#39;cell1&#39; where name=&#39;default&#39;;&quot;</span>
+oc<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>mariadb-openstack-cell1<span class="w"> </span>--<span class="w"> </span>mysql<span class="w"> </span>--user<span class="o">=</span>root<span class="w"> </span>--password<span class="o">=</span><span class="si">${</span><span class="nv">db_server_password_map</span><span class="p">[</span><span class="s2">&quot;default&quot;</span><span class="p">]</span><span class="si">}</span><span class="w"> </span>-e<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="s2">&quot;delete from nova_cell1.services where host not like &#39;%nova-cell1-%&#39; and services.binary != &#39;nova-compute&#39;;&quot;</span>
 </code></pre></div>
 <h2 id="post-checks">Post-checks<a class="headerlink" href="#post-checks" title="Permanent link">#</a></h2>
 <ul>
 <li>Check that the databases were imported correctly:</li>
 </ul>
-<div class="highlight"><pre><span></span><code>oc run mariadb-client --image $MARIADB_IMAGE -i --rm --restart=Never -- \
-mysql -h &quot;${PODIFIED_MARIADB_IP}&quot; -uroot &quot;-p${PODIFIED_DB_ROOT_PASSWORD}&quot; -e &#39;SHOW databases;&#39; \
-    | grep keystone
-# ensure neutron db is renamed from ovs_neutron
-oc run mariadb-client --image $MARIADB_IMAGE -i --rm --restart=Never -- \
-mysql -h &quot;${PODIFIED_MARIADB_IP}&quot; -uroot &quot;-p${PODIFIED_DB_ROOT_PASSWORD}&quot; -e &#39;SHOW databases;&#39; \
-    | grep neutron
-# ensure nova cell1 db is extracted to a separate db server and renamed from nova to nova_cell1
-oc run mariadb-client --image $MARIADB_IMAGE -i --rm --restart=Never -- \
-mysql -h &quot;${PODIFIED_CELL1_MARIADB_IP}&quot; -uroot &quot;-p${PODIFIED_DB_ROOT_PASSWORD}&quot; -e &#39;SHOW databases;&#39; \
-    | grep nova_cell1
+<div class="highlight"><pre><span></span><code>oc<span class="w"> </span>run<span class="w"> </span>mariadb-client<span class="w"> </span>--image<span class="w"> </span><span class="nv">$MARIADB_IMAGE</span><span class="w"> </span>-i<span class="w"> </span>--rm<span class="w"> </span>--restart<span class="o">=</span>Never<span class="w"> </span>--<span class="w"> </span><span class="se">\</span>
+mysql<span class="w"> </span>-h<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PODIFIED_MARIADB_IP</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span>-uroot<span class="w"> </span><span class="s2">&quot;-p</span><span class="si">${</span><span class="nv">PODIFIED_DB_ROOT_PASSWORD</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span>-e<span class="w"> </span><span class="s1">&#39;SHOW databases;&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>keystone
+<span class="c1"># ensure neutron db is renamed from ovs_neutron</span>
+oc<span class="w"> </span>run<span class="w"> </span>mariadb-client<span class="w"> </span>--image<span class="w"> </span><span class="nv">$MARIADB_IMAGE</span><span class="w"> </span>-i<span class="w"> </span>--rm<span class="w"> </span>--restart<span class="o">=</span>Never<span class="w"> </span>--<span class="w"> </span><span class="se">\</span>
+mysql<span class="w"> </span>-h<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PODIFIED_MARIADB_IP</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span>-uroot<span class="w"> </span><span class="s2">&quot;-p</span><span class="si">${</span><span class="nv">PODIFIED_DB_ROOT_PASSWORD</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span>-e<span class="w"> </span><span class="s1">&#39;SHOW databases;&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>neutron
+<span class="c1"># ensure nova cell1 db is extracted to a separate db server and renamed from nova to nova_cell1</span>
+oc<span class="w"> </span>run<span class="w"> </span>mariadb-client<span class="w"> </span>--image<span class="w"> </span><span class="nv">$MARIADB_IMAGE</span><span class="w"> </span>-i<span class="w"> </span>--rm<span class="w"> </span>--restart<span class="o">=</span>Never<span class="w"> </span>--<span class="w"> </span><span class="se">\</span>
+mysql<span class="w"> </span>-h<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PODIFIED_CELL1_MARIADB_IP</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span>-uroot<span class="w"> </span><span class="s2">&quot;-p</span><span class="si">${</span><span class="nv">PODIFIED_DB_ROOT_PASSWORD</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span>-e<span class="w"> </span><span class="s1">&#39;SHOW databases;&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>nova_cell1
 </code></pre></div>
 <ul>
 <li>During the pre/post checks the pod <code>mariadb-client</code> might have returned a pod security warning
@@ -1242,7 +1281,7 @@ mysql -h &quot;${PODIFIED_CELL1_MARIADB_IP}&quot; -uroot &quot;-p${PODIFIED_DB_R
   <small>
     
       Last update:
-      2023-09-26
+      2023-09-29
     
   </small>
 </div>

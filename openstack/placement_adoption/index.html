@@ -18,7 +18,7 @@
         <link rel="prev" href="../glance_adoption/">
       
       
-        <link rel="next" href="../cinder_adoption/">
+        <link rel="next" href="../nova_adoption/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
@@ -618,6 +618,26 @@
   
   
     <li class="md-nav__item">
+      <a href="../nova_adoption/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Nova adoption
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../cinder_adoption/" class="md-nav__link">
         
   
@@ -1048,8 +1068,12 @@
 <h1 id="placement-adoption">Placement adoption<a class="headerlink" href="#placement-adoption" title="Permanent link">#</a></h1>
 <h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h2>
 <ul>
-<li>Previous Adoption steps completed. Notably, the service databases
-  must already be imported into the podified MariaDB.</li>
+<li>Previous Adoption steps completed. Notably,</li>
+<li>the <a href="../mariadb_copy/">service databases</a>
+    must already be imported into the podified MariaDB.</li>
+<li>the <a href="../keystone_adoption/">Keystone service</a> needs to be imported.</li>
+<li>the Memcached operator needs to be deployed (nothing to import for it from
+    the source environment).</li>
 </ul>
 <h2 id="variables">Variables<a class="headerlink" href="#variables" title="Permanent link">#</a></h2>
 <p>(There are no shell variables necessary currently.)</p>
@@ -1101,7 +1125,7 @@ openstack resource class list
   <small>
     
       Last update:
-      2023-11-14
+      2023-09-29
     
   </small>
 </div>

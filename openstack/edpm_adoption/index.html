@@ -542,6 +542,26 @@
   
   
     <li class="md-nav__item">
+      <a href="../nova_adoption/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Nova adoption
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../cinder_adoption/" class="md-nav__link">
         
   
@@ -1143,7 +1163,7 @@
 <ul>
 <li>Create a <a href="https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets">ssh authentication secret</a> for the EDPM nodes:</li>
 </ul>
-<p><div class="highlight"><pre><span></span><code>oc<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;EOF</span>
+<div class="highlight"><pre><span></span><code>oc<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;EOF</span>
 <span class="s">apiVersion: v1</span>
 <span class="s">kind: Secret</span>
 <span class="s">metadata:</span>
@@ -1154,191 +1174,197 @@
 <span class="s">$(cat ~/install_yamls/out/edpm/ansibleee-ssh-key-id_rsa | base64 | sed &#39;s/^/        /&#39;)</span>
 <span class="s">EOF</span>
 </code></pre></div>
-* Create the Nova Metadata secret (Workaround while nova isn't adopted yet):</p>
-<div class="highlight"><pre><span></span><code>oc<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;EOF</span>
-<span class="s">apiVersion: v1</span>
-<span class="s">kind: Secret</span>
-<span class="s">metadata:</span>
-<span class="s">    name: nova-metadata-neutron-config</span>
-<span class="s">data:</span>
-<span class="s">    05-nova-metadata.conf: |</span>
-<span class="s">$(echo &quot;[DEFAULT]\nnova_metadata_host = 1.2.3.4\nnova_metadata_port = 8775\nnova_metadata_protocol = http\nmetadata_proxy_shared_secret = 1234567842\n&quot; | base64 | sed &#39;s/^/        /&#39;)</span>
-<span class="s">EOF</span>
+<ul>
+<li>Generate an ssh key-pair <code>nova-migration-ssh-key</code> secret</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span><span class="s2">&quot;</span><span class="k">$(</span>mktemp<span class="w"> </span>-d<span class="k">)</span><span class="s2">&quot;</span>
+ssh-keygen<span class="w"> </span>-f<span class="w"> </span>./id<span class="w"> </span>-t<span class="w"> </span>ed25519<span class="w"> </span>-N<span class="w"> </span><span class="s1">&#39;&#39;</span>
+oc<span class="w"> </span>get<span class="w"> </span>secret<span class="w"> </span>nova-migration-ssh-key<span class="w"> </span><span class="o">||</span><span class="w"> </span>oc<span class="w"> </span>create<span class="w"> </span>secret<span class="w"> </span>generic<span class="w"> </span>nova-migration-ssh-key<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-n<span class="w"> </span>openstack<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--from-file<span class="o">=</span>ssh-privatekey<span class="o">=</span>id<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--from-file<span class="o">=</span>ssh-publickey<span class="o">=</span>id.pub<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--type<span class="w"> </span>kubernetes.io/ssh-auth
+rm<span class="w"> </span>-f<span class="w"> </span>id*
+<span class="nb">cd</span><span class="w"> </span>-
 </code></pre></div>
 <ul>
-<li>Stop the nova services.</li>
+<li>Create a Nova Compute Extra Config service
+    <div class="highlight"><pre><span></span><code><span class="l l-Scalar l-Scalar-Plain">oc apply -f - &lt;&lt;EOF</span>
+<span class="l l-Scalar l-Scalar-Plain">apiVersion</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ConfigMap</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nova-compute-extraconfig</span>
+<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openstack</span>
+<span class="nt">data</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">19-nova-compute-cell1-workarounds.conf</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">    </span><span class="no">[workarounds]</span>
+<span class="w">    </span><span class="no">disable_compute_service_check_for_ffu=true</span>
+<span class="nn">---</span>
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dataplane.openstack.org/v1beta1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">OpenStackDataPlaneService</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nova-compute-extraconfig</span>
+<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openstack</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">label</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nova.compute.extraconfig</span>
+<span class="w">  </span><span class="nt">configMaps</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nova-compute-extraconfig</span>
+<span class="w">  </span><span class="nt">secrets</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nova-cell1-compute-config</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nova-migration-ssh-key</span>
+<span class="w">  </span><span class="nt">playbook</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">osp.edpm.nova</span>
+<span class="l l-Scalar l-Scalar-Plain">EOF</span>
+</code></pre></div></li>
 </ul>
-<div class="highlight"><pre><span></span><code><span class="c1"># Update the services list to be stopped</span>
-
-<span class="nv">ServicesToStop</span><span class="o">=(</span><span class="s2">&quot;tripleo_nova_api_cron.service&quot;</span>
-<span class="w">                </span><span class="s2">&quot;tripleo_nova_api.service&quot;</span>
-<span class="w">                </span><span class="s2">&quot;tripleo_nova_compute.service&quot;</span>
-<span class="w">                </span><span class="s2">&quot;tripleo_nova_conductor.service&quot;</span>
-<span class="w">                </span><span class="s2">&quot;tripleo_nova_libvirt.target&quot;</span>
-<span class="w">                </span><span class="s2">&quot;tripleo_nova_metadata.service&quot;</span>
-<span class="w">                </span><span class="s2">&quot;tripleo_nova_migration_target.service&quot;</span>
-<span class="w">                </span><span class="s2">&quot;tripleo_nova_scheduler.service&quot;</span>
-<span class="w">                </span><span class="s2">&quot;tripleo_nova_virtlogd_wrapper.service&quot;</span>
-<span class="w">                </span><span class="s2">&quot;tripleo_nova_virtnodedevd.service&quot;</span>
-<span class="w">                </span><span class="s2">&quot;tripleo_nova_virtproxyd.service&quot;</span>
-<span class="w">                </span><span class="s2">&quot;tripleo_nova_virtqemud.service&quot;</span>
-<span class="w">                </span><span class="s2">&quot;tripleo_nova_virtsecretd.service&quot;</span>
-<span class="w">                </span><span class="s2">&quot;tripleo_nova_virtstoraged.service&quot;</span>
-<span class="w">                </span><span class="s2">&quot;tripleo_nova_vnc_proxy.service&quot;</span><span class="o">)</span>
-
-<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Stopping nova services&quot;</span>
-
-<span class="k">for</span><span class="w"> </span>service<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="si">${</span><span class="nv">ServicesToStop</span><span class="p">[*]</span><span class="si">}</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
-<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Stopping the </span><span class="nv">$service</span><span class="s2"> in each controller node&quot;</span>
-<span class="w">    </span><span class="nv">$CONTROLLER1_SSH</span><span class="w"> </span>sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span><span class="nv">$service</span>
-<span class="w">    </span><span class="nv">$CONTROLLER2_SSH</span><span class="w"> </span>sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span><span class="nv">$service</span>
-<span class="w">    </span><span class="nv">$CONTROLLER3_SSH</span><span class="w"> </span>sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span><span class="nv">$service</span>
-<span class="k">done</span>
-</code></pre></div>
+<p>The secret <code>nova-cell&lt;X&gt;-compute-config</code> is auto-generated for each
+  <code>cell&lt;X&gt;</code>. That secret, alongside <code>nova-migration-ssh-key</code>, should
+  always be specified for each custom <code>OpenStackDataPlaneService</code> related to Nova.</p>
 <ul>
 <li>Deploy OpenStackDataPlaneNodeSet:</li>
 </ul>
-<div class="highlight"><pre><span></span><code>oc apply -f - &lt;&lt;EOF
-apiVersion: dataplane.openstack.org/v1beta1
-kind: OpenStackDataPlaneNodeSet
-metadata:
-  name: openstack
-spec:
-  networkAttachments:
-      - ctlplane
-  preProvisioned: true
-  services:
-    - download-cache
-    - configure-network
-    - validate-network
-    - install-os
-    - configure-os
-    - run-os
-    - ovn
-  env:
-    - name: ANSIBLE_CALLBACKS_ENABLED
-      value: &quot;profile_tasks&quot;
-    - name: ANSIBLE_FORCE_COLOR
-      value: &quot;True&quot;
-    - name: ANSIBLE_ENABLE_TASK_DEBUGGER
-      value: &quot;True&quot;
-  nodes:
-    standalone:
-      hostName: standalone
-      ansible:
-        ansibleHost: 192.168.122.100
-      networks:
-      - defaultRoute: true
-        fixedIP: 192.168.122.100
-        name: CtlPlane
-        subnetName: subnet1
-      - name: InternalApi
-        subnetName: subnet1
-      - name: Storage
-        subnetName: subnet1
-      - name: Tenant
-        subnetName: subnet1
-  nodeTemplate:
-    ansibleSSHPrivateKeySecret: dataplane-adoption-secret
-    managementNetwork: ctlplane
-    ansible:
-      ansibleUser: root
-      ansiblePort: 22
-      ansibleVars:
-        service_net_map:
-          nova_api_network: internal_api
-          nova_libvirt_network: internal_api
+<div class="highlight"><pre><span></span><code><span class="l l-Scalar l-Scalar-Plain">oc apply -f - &lt;&lt;EOF</span>
+<span class="l l-Scalar l-Scalar-Plain">apiVersion</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dataplane.openstack.org/v1beta1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">OpenStackDataPlaneNodeSet</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openstack</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">networkAttachments</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ctlplane</span>
+<span class="w">  </span><span class="nt">preProvisioned</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">services</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">download-cache</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">configure-network</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">validate-network</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">install-os</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">configure-os</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">run-os</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">libvirt</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nova-compute-extraconfig</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ovn</span>
+<span class="w">  </span><span class="nt">env</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ANSIBLE_CALLBACKS_ENABLED</span>
+<span class="w">      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;profile_tasks&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ANSIBLE_FORCE_COLOR</span>
+<span class="w">      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;True&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ANSIBLE_ENABLE_TASK_DEBUGGER</span>
+<span class="w">      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;True&quot;</span>
+<span class="w">  </span><span class="nt">nodes</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">standalone</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">hostName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">standalone</span>
+<span class="w">      </span><span class="nt">ansible</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">ansibleHost</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">192.168.122.100</span>
+<span class="w">      </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">defaultRoute</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">fixedIP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">192.168.122.100</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CtlPlane</span>
+<span class="w">        </span><span class="nt">subnetName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">subnet1</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">InternalApi</span>
+<span class="w">        </span><span class="nt">subnetName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">subnet1</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Storage</span>
+<span class="w">        </span><span class="nt">subnetName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">subnet1</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Tenant</span>
+<span class="w">        </span><span class="nt">subnetName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">subnet1</span>
+<span class="w">  </span><span class="nt">nodeTemplate</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">ansibleSSHPrivateKeySecret</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dataplane-adoption-secret</span>
+<span class="w">    </span><span class="nt">managementNetwork</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ctlplane</span>
+<span class="w">    </span><span class="nt">ansible</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">ansibleUser</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">root</span>
+<span class="w">      </span><span class="nt">ansiblePort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">22</span>
+<span class="w">      </span><span class="nt">ansibleVars</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">service_net_map</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">nova_api_network</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">internal_api</span>
+<span class="w">          </span><span class="nt">nova_libvirt_network</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">internal_api</span>
 
-        # edpm_network_config
-        # Default nic config template for a EDPM compute node
-        # These vars are edpm_network_config role vars
-        edpm_network_config_override: &quot;&quot;
-        edpm_network_config_template: |
-           ---
-           {% set mtu_list = [ctlplane_mtu] %}
-           {% for network in role_networks %}
-           {{ mtu_list.append(lookup(&#39;vars&#39;, networks_lower[network] ~ &#39;_mtu&#39;)) }}
-           {%- endfor %}
-           {% set min_viable_mtu = mtu_list | max %}
-           network_config:
-           - type: ovs_bridge
-             name: {{ neutron_physical_bridge_name }}
-             mtu: {{ min_viable_mtu }}
-             use_dhcp: false
-             dns_servers: {{ ctlplane_dns_nameservers }}
-             domain: {{ dns_search_domains }}
-             addresses:
-             - ip_netmask: {{ ctlplane_ip }}/{{ ctlplane_subnet_cidr }}
-             routes: {{ ctlplane_host_routes }}
-             members:
-             - type: interface
-               name: nic1
-               mtu: {{ min_viable_mtu }}
-               # force the MAC address of the bridge to this interface
-               primary: true
-           {% for network in role_networks %}
-             - type: vlan
-               mtu: {{ lookup(&#39;vars&#39;, networks_lower[network] ~ &#39;_mtu&#39;) }}
-               vlan_id: {{ lookup(&#39;vars&#39;, networks_lower[network] ~ &#39;_vlan_id&#39;) }}
-               addresses:
-               - ip_netmask:
-                   {{ lookup(&#39;vars&#39;, networks_lower[network] ~ &#39;_ip&#39;) }}/{{ lookup(&#39;vars&#39;, networks_lower[network] ~ &#39;_cidr&#39;) }}
-               routes: {{ lookup(&#39;vars&#39;, networks_lower[network] ~ &#39;_host_routes&#39;) }}
-           {% endfor %}
+<span class="w">        </span><span class="c1"># edpm_network_config</span>
+<span class="w">        </span><span class="c1"># Default nic config template for a EDPM compute node</span>
+<span class="w">        </span><span class="c1"># These vars are edpm_network_config role vars</span>
+<span class="w">        </span><span class="nt">edpm_network_config_override</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
+<span class="w">        </span><span class="nt">edpm_network_config_template</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">           </span><span class="no">---</span>
+<span class="w">           </span><span class="no">{% set mtu_list = [ctlplane_mtu] %}</span>
+<span class="w">           </span><span class="no">{% for network in role_networks %}</span>
+<span class="w">           </span><span class="no">{{ mtu_list.append(lookup(&#39;vars&#39;, networks_lower[network] ~ &#39;_mtu&#39;)) }}</span>
+<span class="w">           </span><span class="no">{%- endfor %}</span>
+<span class="w">           </span><span class="no">{% set min_viable_mtu = mtu_list | max %}</span>
+<span class="w">           </span><span class="no">network_config:</span>
+<span class="w">           </span><span class="no">- type: ovs_bridge</span>
+<span class="w">             </span><span class="no">name: {{ neutron_physical_bridge_name }}</span>
+<span class="w">             </span><span class="no">mtu: {{ min_viable_mtu }}</span>
+<span class="w">             </span><span class="no">use_dhcp: false</span>
+<span class="w">             </span><span class="no">dns_servers: {{ ctlplane_dns_nameservers }}</span>
+<span class="w">             </span><span class="no">domain: {{ dns_search_domains }}</span>
+<span class="w">             </span><span class="no">addresses:</span>
+<span class="w">             </span><span class="no">- ip_netmask: {{ ctlplane_ip }}/{{ ctlplane_subnet_cidr }}</span>
+<span class="w">             </span><span class="no">routes: {{ ctlplane_host_routes }}</span>
+<span class="w">             </span><span class="no">members:</span>
+<span class="w">             </span><span class="no">- type: interface</span>
+<span class="w">               </span><span class="no">name: nic1</span>
+<span class="w">               </span><span class="no">mtu: {{ min_viable_mtu }}</span>
+<span class="w">               </span><span class="no"># force the MAC address of the bridge to this interface</span>
+<span class="w">               </span><span class="no">primary: true</span>
+<span class="w">           </span><span class="no">{% for network in role_networks %}</span>
+<span class="w">             </span><span class="no">- type: vlan</span>
+<span class="w">               </span><span class="no">mtu: {{ lookup(&#39;vars&#39;, networks_lower[network] ~ &#39;_mtu&#39;) }}</span>
+<span class="w">               </span><span class="no">vlan_id: {{ lookup(&#39;vars&#39;, networks_lower[network] ~ &#39;_vlan_id&#39;) }}</span>
+<span class="w">               </span><span class="no">addresses:</span>
+<span class="w">               </span><span class="no">- ip_netmask:</span>
+<span class="w">                   </span><span class="no">{{ lookup(&#39;vars&#39;, networks_lower[network] ~ &#39;_ip&#39;) }}/{{ lookup(&#39;vars&#39;, networks_lower[network] ~ &#39;_cidr&#39;) }}</span>
+<span class="w">               </span><span class="no">routes: {{ lookup(&#39;vars&#39;, networks_lower[network] ~ &#39;_host_routes&#39;) }}</span>
+<span class="w">           </span><span class="no">{% endfor %}</span>
 
-        edpm_network_config_hide_sensitive_logs: false
-        #
-        # These vars are for the network config templates themselves and are
-        # considered EDPM network defaults.
-        neutron_physical_bridge_name: br-ctlplane
-        neutron_public_interface_name: eth0
-        role_networks:
-        - InternalApi
-        - Storage
-        - Tenant
-        networks_lower:
-          External: external
-          InternalApi: internal_api
-          Storage: storage
-          Tenant: tenant
+<span class="w">        </span><span class="nt">edpm_network_config_hide_sensitive_logs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">        </span><span class="c1">#</span>
+<span class="w">        </span><span class="c1"># These vars are for the network config templates themselves and are</span>
+<span class="w">        </span><span class="c1"># considered EDPM network defaults.</span>
+<span class="w">        </span><span class="nt">neutron_physical_bridge_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">br-ctlplane</span>
+<span class="w">        </span><span class="nt">neutron_public_interface_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">eth0</span>
+<span class="w">        </span><span class="nt">role_networks</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">InternalApi</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Storage</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Tenant</span>
+<span class="w">        </span><span class="nt">networks_lower</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">External</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">external</span>
+<span class="w">          </span><span class="nt">InternalApi</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">internal_api</span>
+<span class="w">          </span><span class="nt">Storage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">storage</span>
+<span class="w">          </span><span class="nt">Tenant</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tenant</span>
 
-        # edpm_nodes_validation
-        edpm_nodes_validation_validate_controllers_icmp: false
-        edpm_nodes_validation_validate_gateway_icmp: false
+<span class="w">        </span><span class="c1"># edpm_nodes_validation</span>
+<span class="w">        </span><span class="nt">edpm_nodes_validation_validate_controllers_icmp</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">        </span><span class="nt">edpm_nodes_validation_validate_gateway_icmp</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 
-        edpm_chrony_ntp_servers:
-        - clock.redhat.com
-        - clock2.redhat.com
+<span class="w">        </span><span class="nt">edpm_chrony_ntp_servers</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">clock.redhat.com</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">clock2.redhat.com</span>
 
-        edpm_ovn_controller_agent_image: quay.io/podified-antelope-centos9/openstack-ovn-controller:current-podified
-        edpm_iscsid_image: quay.io/podified-antelope-centos9/openstack-iscsid:current-podified
-        edpm_logrotate_crond_image: quay.io/podified-antelope-centos9/openstack-cron:current-podified
-        edpm_nova_compute_container_image: quay.io/podified-antelope-centos9/openstack-nova-compute:current-podified
-        edpm_nova_libvirt_container_image: quay.io/podified-antelope-centos9/openstack-nova-libvirt:current-podified
-        edpm_ovn_metadata_agent_image: quay.io/podified-antelope-centos9/openstack-neutron-metadata-agent-ovn:current-podified
+<span class="w">        </span><span class="nt">edpm_ovn_controller_agent_image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">quay.io/podified-antelope-centos9/openstack-ovn-controller:current-podified</span>
+<span class="w">        </span><span class="nt">edpm_iscsid_image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">quay.io/podified-antelope-centos9/openstack-iscsid:current-podified</span>
+<span class="w">        </span><span class="nt">edpm_logrotate_crond_image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">quay.io/podified-antelope-centos9/openstack-cron:current-podified</span>
+<span class="w">        </span><span class="nt">edpm_nova_compute_container_image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">quay.io/podified-antelope-centos9/openstack-nova-compute:current-podified</span>
+<span class="w">        </span><span class="nt">edpm_nova_libvirt_container_image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">quay.io/podified-antelope-centos9/openstack-nova-libvirt:current-podified</span>
+<span class="w">        </span><span class="nt">edpm_ovn_metadata_agent_image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">quay.io/podified-antelope-centos9/openstack-neutron-metadata-agent-ovn:current-podified</span>
 
-        gather_facts: false
-        enable_debug: false
-        # edpm firewall, change the allowed CIDR if needed
-        edpm_sshd_configure_firewall: true
-        edpm_sshd_allowed_ranges: [&#39;192.168.122.0/24&#39;]
-        # SELinux module
-        edpm_selinux_mode: enforcing
-        plan: overcloud
-EOF
+<span class="w">        </span><span class="nt">gather_facts</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">        </span><span class="nt">enable_debug</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">        </span><span class="c1"># edpm firewall, change the allowed CIDR if needed</span>
+<span class="w">        </span><span class="nt">edpm_sshd_configure_firewall</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">edpm_sshd_allowed_ranges</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;192.168.122.0/24&#39;</span><span class="p p-Indicator">]</span>
+<span class="w">        </span><span class="c1"># SELinux module</span>
+<span class="w">        </span><span class="nt">edpm_selinux_mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enforcing</span>
+<span class="w">        </span><span class="nt">plan</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">overcloud</span>
+<span class="l l-Scalar l-Scalar-Plain">EOF</span>
 </code></pre></div>
 <ul>
 <li>Deploy OpenStackDataPlaneDeployment:</li>
 </ul>
-<div class="highlight"><pre><span></span><code>oc apply -f - &lt;&lt;EOF
-apiVersion: dataplane.openstack.org/v1beta1
-kind: OpenStackDataPlaneDeployment
-metadata:
-  name: openstack
-spec:
-  nodeSets:
-  - openstack
-EOF
+<div class="highlight"><pre><span></span><code><span class="l l-Scalar l-Scalar-Plain">oc apply -f - &lt;&lt;EOF</span>
+<span class="l l-Scalar l-Scalar-Plain">apiVersion</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dataplane.openstack.org/v1beta1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">OpenStackDataPlaneDeployment</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openstack</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">nodeSets</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openstack</span>
+<span class="l l-Scalar l-Scalar-Plain">EOF</span>
 </code></pre></div>
 <h2 id="post-checks">Post-checks<a class="headerlink" href="#post-checks" title="Permanent link">#</a></h2>
 <ul>
@@ -1352,9 +1378,9 @@ oc<span class="w"> </span>logs<span class="w"> </span>-l<span class="w"> </span>
 </code></pre></div></p>
 </li>
 <li>
-<p>Wait for the dataplane node set to reach the Ready status:
-    <div class="highlight"><pre><span></span><code>oc wait --for condition=Ready osdpns/openstack --timeout=30m
-</code></pre></div></p>
+<p>Wait for the dataplane node set to reach the Ready status:</p>
+<div class="highlight"><pre><span></span><code>oc wait --for condition=Ready osdpns/openstack --timeout=30m
+</code></pre></div>
 </li>
 </ul>
 
@@ -1363,7 +1389,7 @@ oc<span class="w"> </span>logs<span class="w"> </span>-l<span class="w"> </span>
   <small>
     
       Last update:
-      2023-10-05
+      2023-09-29
     
   </small>
 </div>

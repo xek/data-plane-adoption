@@ -96,6 +96,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://openstack-k8s-operators.github.io/data-plane-adoption/openstack/nova_adoption/</loc>
+         <lastmod>2023-11-17</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://openstack-k8s-operators.github.io/data-plane-adoption/openstack/ovn_adoption/</loc>
          <lastmod>2023-11-17</lastmod>
          <changefreq>daily</changefreq>
