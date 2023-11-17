@@ -22,7 +22,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.8">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.9">
     
     
       
@@ -30,7 +30,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.4b4a2bd9.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.78cf6014.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.356b1318.min.css">
@@ -549,14 +549,18 @@
       
         <li class="md-nav__item">
   <a href="#prerequisites" class="md-nav__link">
-    Prerequisites
+    <span class="md-ellipsis">
+      Prerequisites
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#procedure-glance-adoption" class="md-nav__link">
-    Procedure - Glance adoption
+    <span class="md-ellipsis">
+      Procedure - Glance adoption
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="Procedure - Glance adoption">
@@ -564,14 +568,18 @@
         
           <li class="md-nav__item">
   <a href="#using-local-storage-backend" class="md-nav__link">
-    Using local storage backend
+    <span class="md-ellipsis">
+      Using local storage backend
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#using-ceph-storage-backend" class="md-nav__link">
-    Using Ceph storage backend
+    <span class="md-ellipsis">
+      Using Ceph storage backend
+    </span>
   </a>
   
 </li>
@@ -583,7 +591,9 @@
       
         <li class="md-nav__item">
   <a href="#post-checks" class="md-nav__link">
-    Post-checks
+    <span class="md-ellipsis">
+      Post-checks
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="Post-checks">
@@ -591,14 +601,18 @@
         
           <li class="md-nav__item">
   <a href="#test-the-glance-service-from-the-openstack-cli" class="md-nav__link">
-    Test the glance service from the OpenStack CLI
+    <span class="md-ellipsis">
+      Test the glance service from the OpenStack CLI
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#image-upload" class="md-nav__link">
-    Image upload
+    <span class="md-ellipsis">
+      Image upload
+    </span>
   </a>
   
 </li>
@@ -1018,14 +1032,18 @@
       
         <li class="md-nav__item">
   <a href="#prerequisites" class="md-nav__link">
-    Prerequisites
+    <span class="md-ellipsis">
+      Prerequisites
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#procedure-glance-adoption" class="md-nav__link">
-    Procedure - Glance adoption
+    <span class="md-ellipsis">
+      Procedure - Glance adoption
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="Procedure - Glance adoption">
@@ -1033,14 +1051,18 @@
         
           <li class="md-nav__item">
   <a href="#using-local-storage-backend" class="md-nav__link">
-    Using local storage backend
+    <span class="md-ellipsis">
+      Using local storage backend
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#using-ceph-storage-backend" class="md-nav__link">
-    Using Ceph storage backend
+    <span class="md-ellipsis">
+      Using Ceph storage backend
+    </span>
   </a>
   
 </li>
@@ -1052,7 +1074,9 @@
       
         <li class="md-nav__item">
   <a href="#post-checks" class="md-nav__link">
-    Post-checks
+    <span class="md-ellipsis">
+      Post-checks
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="Post-checks">
@@ -1060,14 +1084,18 @@
         
           <li class="md-nav__item">
   <a href="#test-the-glance-service-from-the-openstack-cli" class="md-nav__link">
-    Test the glance service from the OpenStack CLI
+    <span class="md-ellipsis">
+      Test the glance service from the OpenStack CLI
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#image-upload" class="md-nav__link">
-    Image upload
+    <span class="md-ellipsis">
+      Image upload
+    </span>
   </a>
   
 </li>
@@ -1130,7 +1158,7 @@ spec:
       databaseInstance: openstack
       storageClass: &quot;local-storage&quot;
       storageRequest: 10G
-      glanceAPIInternal:
+      glanceAPI:
         override:
           service:
             metadata:
@@ -1140,9 +1168,6 @@ spec:
                 metallb.universe.tf/loadBalancerIPs: 172.17.0.80
             spec:
               type: LoadBalancer
-        networkAttachments:
-        - storage
-      glanceAPIExternal:
         networkAttachments:
         - storage
 &#39;
@@ -1173,7 +1198,7 @@ configuration</a>.</p>
 <span class="s">        store_description=Ceph glance store backend.</span>
 <span class="s">      storageClass: &quot;local-storage&quot;</span>
 <span class="s">      storageRequest: 10G</span>
-<span class="s">      glanceAPIInternal:</span>
+<span class="s">      glanceAPI:</span>
 <span class="s">        override:</span>
 <span class="s">          service:</span>
 <span class="s">            metadata:</span>
@@ -1183,9 +1208,6 @@ configuration</a>.</p>
 <span class="s">                metallb.universe.tf/loadBalancerIPs: 172.17.0.80</span>
 <span class="s">            spec:</span>
 <span class="s">              type: LoadBalancer</span>
-<span class="s">        networkAttachments:</span>
-<span class="s">        - storage</span>
-<span class="s">      glanceAPIExternal:</span>
 <span class="s">        networkAttachments:</span>
 <span class="s">        - storage</span>
 <span class="s">EOF</span>
@@ -1322,7 +1344,7 @@ c3158cad-d50b-452f-bec1-f250562f5c1f
   <small>
     
       Last update:
-      2023-11-10
+      2023-10-29
     
   </small>
 </div>
@@ -1367,7 +1389,7 @@ c3158cad-d50b-452f-bec1-f250562f5c1f
     <script id="__config" type="application/json">{"base": "../..", "features": ["search.suggest", "search.highlight", "search.share"], "search": "../../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.81fa17fe.min.js"></script>
+      <script src="../../assets/javascripts/bundle.6c14ae12.min.js"></script>
       
     
   </body>
