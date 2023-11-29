@@ -1294,11 +1294,20 @@ oc set data secret/osp-secret &quot;PlacementPassword=$PLACEMENT_PASSWORD&quot;
 <span class="w">  </span><span class="nt">ovn</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 <span class="w">    </span><span class="nt">template</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">ovnDBCluster</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">ovndbcluster-nb</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">dbType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NB</span>
+<span class="w">          </span><span class="nt">storageRequest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10G</span>
+<span class="w">          </span><span class="nt">networkAttachment</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">internalapi</span>
+<span class="w">        </span><span class="nt">ovndbcluster-sb</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">dbType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SB</span>
+<span class="w">          </span><span class="nt">storageRequest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10G</span>
+<span class="w">          </span><span class="nt">networkAttachment</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">internalapi</span>
+<span class="w">      </span><span class="nt">ovnNorthd</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">networkAttachment</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">internalapi</span>
+<span class="w">        </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 <span class="w">      </span><span class="nt">ovnController</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">external-ids</span><span class="p">:</span>
-<span class="w">          </span><span class="nt">system-id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;random&quot;</span>
-<span class="w">          </span><span class="nt">ovn-bridge</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;br-int&quot;</span>
-<span class="w">          </span><span class="nt">ovn-encap-type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;geneve&quot;</span>
+<span class="w">        </span><span class="nt">networkAttachment</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tenant</span>
 
 <span class="w">  </span><span class="nt">placement</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
@@ -1342,7 +1351,7 @@ oc set data secret/osp-secret &quot;PlacementPassword=$PLACEMENT_PASSWORD&quot;
   <small>
     
       Last update:
-      2023-10-29
+      2023-11-29
     
   </small>
 </div>
